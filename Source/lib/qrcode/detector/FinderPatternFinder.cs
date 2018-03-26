@@ -34,11 +34,11 @@ namespace ZXing.QrCode.Internal
       /// <summary>
       /// 1 pixel/module times 3 modules/center
       /// </summary>
-      protected internal const int MIN_SKIP = 3; 
+      protected internal const int MIN_SKIP = 3;
       /// <summary>
-      /// support up to version 10 for mobile clients
+      /// support up to version 20 for mobile clients
       /// </summary>
-      protected internal const int MAX_MODULES = 57;
+      protected internal const int MAX_MODULES = 97;
       private const int INTEGER_MATH_SHIFT = 8;
 
       private readonly BitMatrix image;
@@ -114,11 +114,7 @@ namespace ZXing.QrCode.Internal
          for (int i = iSkip - 1; i < maxI && !done; i += iSkip)
          {
             // Get a row of black/white values
-            stateCount[0] = 0;
-            stateCount[1] = 0;
-            stateCount[2] = 0;
-            stateCount[3] = 0;
-            stateCount[4] = 0;
+            clearCounts(stateCount);
             int currentState = 0;
             for (int j = 0; j < maxJ; j++)
             {
@@ -174,30 +170,18 @@ namespace ZXing.QrCode.Internal
                            }
                            else
                            {
-                              stateCount[0] = stateCount[2];
-                              stateCount[1] = stateCount[3];
-                              stateCount[2] = stateCount[4];
-                              stateCount[3] = 1;
-                              stateCount[4] = 0;
+                              shiftCounts2(stateCount);
                               currentState = 3;
                               continue;
                            }
                            // Clear state to start looking again
                            currentState = 0;
-                           stateCount[0] = 0;
-                           stateCount[1] = 0;
-                           stateCount[2] = 0;
-                           stateCount[3] = 0;
-                           stateCount[4] = 0;
+                           clearCounts(stateCount);
                         }
                         else
                         {
                            // No, shift counts back by two
-                           stateCount[0] = stateCount[2];
-                           stateCount[1] = stateCount[3];
-                           stateCount[2] = stateCount[4];
-                           stateCount[3] = 1;
-                           stateCount[4] = 0;
+                           shiftCounts2(stateCount);
                            currentState = 3;
                         }
                      }
@@ -315,13 +299,25 @@ namespace ZXing.QrCode.Internal
       {
          get
          {
-            crossCheckStateCount[0] = 0;
-            crossCheckStateCount[1] = 0;
-            crossCheckStateCount[2] = 0;
-            crossCheckStateCount[3] = 0;
-            crossCheckStateCount[4] = 0;
+            clearCounts(crossCheckStateCount);
             return crossCheckStateCount;
          }
+      }
+      protected void clearCounts(int[] counts)
+      {
+         for (int x = 0; x < counts.Length; x++)
+         {
+            counts[x] = 0;
+         }
+      }
+
+      protected void shiftCounts2(int[] stateCount)
+      {
+         stateCount[0] = stateCount[2];
+         stateCount[1] = stateCount[3];
+         stateCount[2] = stateCount[4];
+         stateCount[3] = 1;
+         stateCount[4] = 0;
       }
 
       /// <summary>
@@ -576,15 +572,14 @@ namespace ZXing.QrCode.Internal
       }
 
       /// <summary>
-      /// @deprecated only exists for backwards compatibility
       /// @see #handlePossibleCenter(int[], int, int)
       /// </summary>
-      /// <param name="stateCount"></param>
-      /// <param name="i"></param>
-      /// <param name="j"></param>
-      /// <param name="pureBarcode"></param>
-      /// <returns></returns>
-      [Obsolete]
+      /// <param name="stateCount">reading state module counts from horizontal scan</param>
+      /// <param name="i">row where finder pattern may be found</param>
+      /// <param name="j">end of possible finder pattern in row</param>
+      /// <param name="pureBarcode">ignored</param>
+      /// <returns>true if a finder pattern candidate was found this time</returns>
+      [Obsolete("only exists for backwards compatibility")]
       protected bool handlePossibleCenter(int[] stateCount, int i, int j, bool pureBarcode)
       {
          return handlePossibleCenter(stateCount, i, j);
