@@ -146,7 +146,7 @@ namespace ZXing.Common
             int bitsOffset = from >> 5;
             int currentBits = bits[bitsOffset];
             // mask off lesser bits first
-            currentBits &= ~((1 << (from & 0x1F)) - 1);
+            currentBits &= -(1 << (from & 0x1F));
             while (currentBits == 0)
             {
                 if (++bitsOffset == bits.Length)
@@ -173,7 +173,7 @@ namespace ZXing.Common
             int bitsOffset = from >> 5;
             int currentBits = ~bits[bitsOffset];
             // mask off lesser bits first
-            currentBits &= ~((1 << (from & 0x1F)) - 1);
+            currentBits &= -(1 << (from & 0x1F));
             while (currentBits == 0)
             {
                 if (++bitsOffset == bits.Length)
@@ -462,7 +462,7 @@ namespace ZXing.Common
         /// </returns>
         public override String ToString()
         {
-            var result = new System.Text.StringBuilder(size);
+            var result = new System.Text.StringBuilder(size + (size / 8) + 1);
             for (int i = 0; i < size; i++)
             {
                 if ((i & 0x07) == 0)

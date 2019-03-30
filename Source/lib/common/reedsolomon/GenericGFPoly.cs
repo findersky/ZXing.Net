@@ -276,6 +276,10 @@ namespace ZXing.Common.ReedSolomon
 
         public override String ToString()
         {
+            if (isZero)
+            {
+                return "0";
+            }
             StringBuilder result = new StringBuilder(8 * Degree);
             for (int degree = Degree; degree >= 0; degree--)
             {
@@ -284,7 +288,14 @@ namespace ZXing.Common.ReedSolomon
                 {
                     if (coefficient < 0)
                     {
-                        result.Append(" - ");
+                        if (degree == Degree)
+                        {
+                            result.Append("-");
+                        }
+                        else
+                        {
+                            result.Append(" - ");
+                        }
                         coefficient = -coefficient;
                     }
                     else

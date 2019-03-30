@@ -72,7 +72,7 @@ namespace ZXing.QrCode.Internal
         /// <summary>
         /// Gets the image.
         /// </summary>
-        virtual protected internal BitMatrix Image
+        protected internal virtual BitMatrix Image
         {
             get
             {
@@ -83,7 +83,7 @@ namespace ZXing.QrCode.Internal
         /// <summary>
         /// Gets the possible centers.
         /// </summary>
-        virtual protected internal List<FinderPattern> PossibleCenters
+        protected internal virtual List<FinderPattern> PossibleCenters
         {
             get
             {
@@ -324,9 +324,6 @@ namespace ZXing.QrCode.Internal
         /// After a vertical and horizontal scan finds a potential finder pattern, this method
         /// "cross-cross-cross-checks" by scanning down diagonally through the center of the possible
         /// finder pattern to see if the same proportion is detected.
-        /// @param maxCount maximum reasonable number of modules that should be
-        ///  observed in any reading state, based on the results of the horizontal scan
-        /// @param originalStateCountTotal The original state count total.
         /// </summary>
         /// <param name="centerI">row where a finder pattern was detected</param>
         /// <param name="centerJ">center of the section that appears to cross a finder pattern</param>
@@ -737,20 +734,20 @@ namespace ZXing.QrCode.Internal
             if (startSize > 3)
             {
                 // But we can only afford to do so if we have at least 4 possibilities to choose from
-                float totalModuleSize = 0.0f;
-                float square = 0.0f;
+                double totalModuleSize = 0.0;
+                double square = 0.0;
                 foreach (var center in possibleCenters)
                 {
                     float size = center.EstimatedModuleSize;
                     totalModuleSize += size;
                     square += size * size;
                 }
-                float average = totalModuleSize / startSize;
+                double average = totalModuleSize / startSize;
                 float stdDev = (float)Math.Sqrt(square / startSize - average * average);
 
-                possibleCenters.Sort(new FurthestFromAverageComparator(average));
+                possibleCenters.Sort(new FurthestFromAverageComparator((float)average));
 
-                float limit = Math.Max(0.2f * average, stdDev);
+                float limit = Math.Max(0.2f * (float)average, stdDev);
 
                 for (int i = 0; i < possibleCenters.Count && possibleCenters.Count > 3; i++)
                 {
