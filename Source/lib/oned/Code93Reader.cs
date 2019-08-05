@@ -44,7 +44,7 @@ namespace ZXing.OneD
                                                     0x12E, 0x1D4, 0x1D2, 0x1CA, 0x16E, 0x176, 0x1AE, // - - %
                                                     0x126, 0x1DA, 0x1D6, 0x132, 0x15E, // Control chars? $-*
                                                  };
-        private static readonly int ASTERISK_ENCODING = CHARACTER_ENCODINGS[47];
+        internal static readonly int ASTERISK_ENCODING = CHARACTER_ENCODINGS[47];
 
         private readonly StringBuilder decodeRowResult;
         private readonly int[] counters;
@@ -303,14 +303,29 @@ namespace ZXing.OneD
                                 // %K to %O map to [ \ ] ^ _
                                 decodedChar = (char)(next + 16);
                             }
-                            else if (next >= 'P' && next <= 'S')
+                            else if (next >= 'P' && next <= 'T')
                             {
-                                // %P to %S map to { | } ~
+                                // %P to %T map to { | } ~ DEL
                                 decodedChar = (char)(next + 43);
                             }
-                            else if (next >= 'T' && next <= 'Z')
+                            else if (next == 'U')
                             {
-                                // %T to %Z all map to DEL (127)
+                                // %U map to NUL
+                                decodedChar = '\0';
+                            }
+                            else if (next == 'V')
+                            {
+                                // %V map to @
+                                decodedChar = '@';
+                            }
+                            else if (next == 'W')
+                            {
+                                // %W map to `
+                                decodedChar = '`';
+                            }
+                            else if (next >= 'X' && next <= 'Z')
+                            {
+                                // %X to %Z all map to DEL (127)
                                 decodedChar = (char)127;
                             }
                             else
