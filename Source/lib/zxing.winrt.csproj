@@ -301,6 +301,7 @@
     <Compile Include="oned\ITFWriter.cs" />
     <Compile Include="oned\MSIReader.cs" />
     <Compile Include="oned\MSIWriter.cs" />
+    <Compile Include="oned\PharmaCodeReader.cs" />
     <Compile Include="oned\PlesseyWriter.cs" />
     <Compile Include="oned\MultiFormatOneDReader.cs" />
     <Compile Include="oned\MultiFormatUPCEANReader.cs" />
@@ -368,7 +369,9 @@
     <Compile Include="pdf417\encoder\PDF417EncodingOptions.cs" />
     <Compile Include="pdf417\encoder\PDF417ErrorCorrection.cs" />
     <Compile Include="pdf417\encoder\PDF417HighLevelEncoder.cs" />
+    <Compile Include="pdf417\encoder\PDF417OptionalMacroFields.cs" />
     <Compile Include="pdf417\PDF417Common.cs" />
+    <Compile Include="pdf417\PDF417MacroMetadata.cs" />
     <Compile Include="pdf417\PDF417Reader.cs" />
     <Compile Include="pdf417\PDF417ResultMetadata.cs" />
     <Compile Include="pdf417\PDF417Writer.cs" />
@@ -395,6 +398,7 @@
     <Compile Include="qrcode\encoder\Encoder.cs" />
     <Compile Include="qrcode\encoder\MaskUtil.cs" />
     <Compile Include="qrcode\encoder\MatrixUtil.cs" />
+    <Compile Include="qrcode\encoder\MinimalEncoder.cs" />
     <Compile Include="qrcode\encoder\QRCode.cs" />
     <Compile Include="qrcode\encoder\QrCodeEncodingOptions.cs" />
     <Compile Include="qrcode\QRCodeReader.cs" />
@@ -412,9 +416,9 @@
     <Compile Include="ResultPoint.cs" />
     <Compile Include="ResultPointCallback.cs" />
     <Compile Include="RGBLuminanceSource.cs" />
-    <Compile Include="silverlight\BrowsableAttribute.cs" />
-    <Compile Include="silverlight\NonSerializedAttribute.cs" />
-    <Compile Include="silverlight\SerializableAttribute.cs" />
+    <Compile Include="uwp\BrowsableAttribute.cs" />
+    <Compile Include="uwp\NonSerializedAttribute.cs" />
+    <Compile Include="uwp\SerializableAttribute.cs" />
     <Compile Include="SupportClass.cs" />
     <Compile Include="Writer.cs" />
     <Compile Include="WriterException.cs" />

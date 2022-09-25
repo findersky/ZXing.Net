@@ -15,13 +15,14 @@
  */
 
 using System;
+using System.ComponentModel;
 
 using ZXing.Common;
 
 namespace ZXing.OneD
 {
     /// <summary>
-    /// The class holds the available options for the QrCodeWriter
+    /// The class holds the available options for the Code128 1D Writer
     /// </summary>
     [Serializable]
     public class Code128EncodingOptions : EncodingOptions
@@ -29,6 +30,9 @@ namespace ZXing.OneD
         /// <summary>
         /// if true, don't switch to codeset C for numbers
         /// </summary>
+#if !NETSTANDARD && !NETFX_CORE && !PORTABLE && !UNITY
+        [Category("Standard"), Description("If true, don't switch to codeset C for numbers.")]
+#endif
         public bool ForceCodesetB
         {
             get
@@ -43,6 +47,50 @@ namespace ZXing.OneD
             {
                 Hints[EncodeHintType.CODE128_FORCE_CODESET_B] = value;
             }
+        }
+        /// <summary>
+        /// Forces which encoding will be used. Currently only used for Code-128 code sets (Type <see cref="System.String" />). Valid values are "A", "B", "C".
+        /// </summary>
+#if !NETSTANDARD && !NETFX_CORE && !PORTABLE && !UNITY
+        [Category("Standard"), Description("Forces which encoding will be used. Valid values are \"A\", \"B\", \"C\".")]
+#endif
+        public Codesets ForceCodeset
+        {
+            get
+            {
+                if (Hints.ContainsKey(EncodeHintType.FORCE_CODE_SET))
+                {
+                    return (Codesets)Hints[EncodeHintType.FORCE_CODE_SET];
+                }
+                return Codesets.None;
+            }
+            set
+            {
+                Hints[EncodeHintType.FORCE_CODE_SET] = value;
+            }
+        }
+
+        /// <summary>
+        /// avaiable codesets
+        /// </summary>
+        public enum Codesets
+        {
+            /// <summary>
+            /// none specified
+            /// </summary>
+            None = -1,
+            /// <summary>
+            /// Codeset A
+            /// </summary>
+            A,
+            /// <summary>
+            /// Codeset B
+            /// </summary>
+            B,
+            /// <summary>
+            /// Codeset C
+            /// </summary>
+            C
         }
     }
 }

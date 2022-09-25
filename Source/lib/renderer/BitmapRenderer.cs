@@ -41,7 +41,6 @@ namespace ZXing.Rendering
         /// <value>The background color.</value>
         public Color Background { get; set; }
 
-#if !WindowsCE
         /// <summary>
         /// Gets or sets the resolution which should be used to create the bitmap
         /// If nothing is set the current system settings are used
@@ -53,7 +52,6 @@ namespace ZXing.Rendering
         /// If nothing is set the current system settings are used
         /// </summary>
         public float? DpiY { get; set; }
-#endif
 
         /// <summary>
         /// Gets or sets the text font.
@@ -74,9 +72,7 @@ namespace ZXing.Rendering
             catch (Exception exc)
             {
                 // have to ignore, no better idea
-#if !WindowsCE
                 System.Diagnostics.Trace.TraceError("default text font (Arial, 10, regular) couldn't be loaded: {0}", exc.Message);
-#endif
             }
         }
 
@@ -163,12 +159,11 @@ namespace ZXing.Rendering
             // create the bitmap and lock the bits because we need the stride
             // which is the width of the image and possible padding bytes
             var bmp = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-#if !WindowsCE
             var dpiX = DpiX ?? DpiY;
             var dpiY = DpiY ?? DpiX;
             if (dpiX != null)
                 bmp.SetResolution(dpiX.Value, dpiY.Value);
-#endif
+
             using (var g = Graphics.FromImage(bmp))
             {
                 var bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
@@ -221,13 +216,9 @@ namespace ZXing.Rendering
                     // fill the bottom area with the background color if the content should be written below the barcode
                     if (outputContent)
                     {
-#if WindowsCE
-                  var textAreaHeight = (int)font.Size + 5;
-#else
                         var textAreaHeight = font.Height;
-#endif
 
-                        emptyArea = height + 10 > textAreaHeight ? textAreaHeight : 0;
+                        emptyArea = height > textAreaHeight ? textAreaHeight : 0;
 
                         if (emptyArea > 0)
                         {
@@ -259,16 +250,30 @@ namespace ZXing.Rendering
                 {
                     switch (format)
                     {
+                        case BarcodeFormat.UPC_E:
                         case BarcodeFormat.EAN_8:
                             if (content.Length < 8)
                                 content = OneDimensionalCodeWriter.CalculateChecksumDigitModulo10(content);
-                            content = content.Insert(4, "   ");
+                            if (content.Length > 4)
+                                content = content.Insert(4, "   ");
                             break;
                         case BarcodeFormat.EAN_13:
                             if (content.Length < 13)
                                 content = OneDimensionalCodeWriter.CalculateChecksumDigitModulo10(content);
-                            content = content.Insert(7, "   ");
-                            content = content.Insert(1, "   ");
+                            if (content.Length > 7)
+                                content = content.Insert(7, "   ");
+                            if (content.Length > 1)
+                                content = content.Insert(1, "   ");
+                            break;
+                        case BarcodeFormat.UPC_A:
+                            if (content.Length < 12)
+                                content = OneDimensionalCodeWriter.CalculateChecksumDigitModulo10(content);
+                            if (content.Length > 11)
+                                content = content.Insert(11, "   ");
+                            if (content.Length > 6)
+                                content = content.Insert(6, "   ");
+                            if (content.Length > 1)
+                                content = content.Insert(1, "   ");
                             break;
                     }
                     var brush = new SolidBrush(Foreground);

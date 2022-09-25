@@ -43,18 +43,18 @@ namespace ZXing.Client.Result
                 return null;
             }
 
-            String summary = matchSingleVCardPrefixedField("SUMMARY", rawText, true);
-            String start = matchSingleVCardPrefixedField("DTSTART", rawText, true);
+            String summary = matchSingleVCardPrefixedField("SUMMARY", rawText);
+            String start = matchSingleVCardPrefixedField("DTSTART", rawText);
             if (start == null)
             {
                 return null;
             }
-            String end = matchSingleVCardPrefixedField("DTEND", rawText, true);
-            String duration = matchSingleVCardPrefixedField("DURATION", rawText, true);
-            String location = matchSingleVCardPrefixedField("LOCATION", rawText, true);
-            String organizer = stripMailto(matchSingleVCardPrefixedField("ORGANIZER", rawText, true));
+            String end = matchSingleVCardPrefixedField("DTEND", rawText);
+            String duration = matchSingleVCardPrefixedField("DURATION", rawText);
+            String location = matchSingleVCardPrefixedField("LOCATION", rawText);
+            String organizer = stripMailto(matchSingleVCardPrefixedField("ORGANIZER", rawText));
 
-            String[] attendees = matchVCardPrefixedField("ATTENDEE", rawText, true);
+            String[] attendees = matchVCardPrefixedField("ATTENDEE", rawText);
             if (attendees != null)
             {
                 for (int i = 0; i < attendees.Length; i++)
@@ -62,9 +62,9 @@ namespace ZXing.Client.Result
                     attendees[i] = stripMailto(attendees[i]);
                 }
             }
-            String description = matchSingleVCardPrefixedField("DESCRIPTION", rawText, true);
+            String description = matchSingleVCardPrefixedField("DESCRIPTION", rawText);
 
-            String geoString = matchSingleVCardPrefixedField("GEO", rawText, true);
+            String geoString = matchSingleVCardPrefixedField("GEO", rawText);
             double latitude;
             double longitude;
             if (geoString == null)
@@ -79,17 +79,10 @@ namespace ZXing.Client.Result
                 {
                     return null;
                 }
-#if WindowsCE
-            try { latitude = Double.Parse(geoString.Substring(0, semicolon), NumberStyles.Float, CultureInfo.InvariantCulture); }
-            catch { return null; }
-            try { longitude = Double.Parse(geoString.Substring(semicolon + 1), NumberStyles.Float, CultureInfo.InvariantCulture); }
-            catch { return null; }
-#else
                 if (!Double.TryParse(geoString.Substring(0, semicolon), NumberStyles.Float, CultureInfo.InvariantCulture, out latitude))
                     return null;
                 if (!Double.TryParse(geoString.Substring(semicolon + 1), NumberStyles.Float, CultureInfo.InvariantCulture, out longitude))
                     return null;
-#endif
             }
 
             try
@@ -112,16 +105,15 @@ namespace ZXing.Client.Result
         }
 
         private static String matchSingleVCardPrefixedField(String prefix,
-                                                            String rawText,
-                                                            bool trim)
+                                                            String rawText)
         {
-            var values = VCardResultParser.matchSingleVCardPrefixedField(prefix, rawText, trim, false);
+            var values = VCardResultParser.matchSingleVCardPrefixedField(prefix, rawText, true, false);
             return values == null || values.Count == 0 ? null : values[0];
         }
 
-        private static String[] matchVCardPrefixedField(String prefix, String rawText, bool trim)
+        private static String[] matchVCardPrefixedField(String prefix, String rawText)
         {
-            List<List<String>> values = VCardResultParser.matchVCardPrefixedField(prefix, rawText, trim, false);
+            List<List<String>> values = VCardResultParser.matchVCardPrefixedField(prefix, rawText, true, false);
             if (values == null || values.Count == 0)
             {
                 return null;

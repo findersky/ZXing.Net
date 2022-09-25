@@ -163,6 +163,7 @@ namespace ZXing.OneD
         {
             var resultPointCallback = hints == null || !hints.ContainsKey(DecodeHintType.NEED_RESULT_POINT_CALLBACK) ? null :
                 (ResultPointCallback)hints[DecodeHintType.NEED_RESULT_POINT_CALLBACK];
+            int symbologyIdentifier = 0;
 
             if (resultPointCallback != null)
             {
@@ -263,6 +264,12 @@ namespace ZXing.OneD
                     decodeResult.putMetadata(ResultMetadataType.POSSIBLE_COUNTRY, countryID);
                 }
             }
+            if (format == BarcodeFormat.EAN_8)
+            {
+                symbologyIdentifier = 4;
+            }
+
+            decodeResult.putMetadata(ResultMetadataType.SYMBOLOGY_IDENTIFIER, "]E" + symbologyIdentifier);
 
             return decodeResult;
         }
@@ -401,7 +408,8 @@ namespace ZXing.OneD
         /// <param name="patterns">the set of patterns to use to decode -- sometimes different encodings</param>
         /// for the digits 0-9 are used, and this indicates the encodings for 0 to 9 that should
         /// be used
-        /// <returns>horizontal offset of first pixel beyond the decoded digit</returns>
+        /// <param name="digit">horizontal offset of first pixel beyond the decoded digit</param>
+        /// <returns></returns>
         internal static bool decodeDigit(BitArray row, int[] counters, int rowOffset, int[][] patterns, out int digit)
         {
             digit = -1;

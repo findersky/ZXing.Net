@@ -2,7 +2,7 @@
 
 SETLOCAL EnableDelayedExpansion EnableExtensions
 
-SET VERSION=0.16.4.0
+SET VERSION=0.16.7.0
 
 SET CURRENT_DIR=%CD%
 SET BUILD_DIR=%CD%\Build
@@ -45,29 +45,31 @@ FOR /F %%b IN (build_deployment_strong_named_files.txt) DO (
  SET f=!f:%%BINARY_DIR%%=%BINARY_DIR%!
  SET f=!f:%%CURRENT_DIR%%=%CURRENT_DIR%!
  
- REM validation of the strong name
- sn -q -vf !f!
- if ERRORLEVEL 1 (
-  ECHO Re-signing the assembly !f!...
-  sn -q -Ra !f! Key\private.snk
+ IF EXIST !f! (
+  REM validation of the strong name
   sn -q -vf !f!
   if ERRORLEVEL 1 (
-   echo Validation failed for !f!
-   SET HAS_VALIDATION_ERROR=1
-  )
- )
-
- REM validation of the correct signing key
- for /F "tokens=1 delims=" %%t in ('"%GET_PUBLICKEYTOKEN_TOOL% !f!"') DO (
-  SET VALIDATION_WAS_CALLED=1
-  IF NOT "%%t" == "4e88037ac681fe60" (
-   echo The assembly !f! is not signed with the correct key. required: 4e88037ac681fe60, found: %%t, re-signing...
+   ECHO Re-signing the assembly !f!...
    sn -q -Ra !f! Key\private.snk
-   
-   for /F "tokens=2 delims=:" %%t in ('"sn -q -T !f!"') DO (
-    IF NOT "%%t" == "4e88037ac681fe60" (
-     echo The assembly !f! is not signed with the correct key. required: 4e88037ac681fe60, found: %%t
-     SET HAS_VALIDATION_ERROR=1
+   sn -q -vf !f!
+   if ERRORLEVEL 1 (
+    echo Validation failed for !f!
+    SET HAS_VALIDATION_ERROR=1
+   )
+  )
+  
+  REM validation of the correct signing key
+  for /F "tokens=1 delims=" %%t in ('"%GET_PUBLICKEYTOKEN_TOOL% !f!"') DO (
+   SET VALIDATION_WAS_CALLED=1
+   IF NOT "%%t" == "4e88037ac681fe60" (
+    echo The assembly !f! is not signed with the correct key. required: 4e88037ac681fe60, found: %%t, re-signing...
+    sn -q -Ra !f! Key\private.snk
+    
+    for /F "tokens=2 delims=:" %%t in ('"sn -q -T !f!"') DO (
+     IF NOT "%%t" == "4e88037ac681fe60" (
+      echo The assembly !f! is not signed with the correct key. required: 4e88037ac681fe60, found: %%t
+      SET HAS_VALIDATION_ERROR=1
+     )
     )
    )
   )
@@ -139,7 +141,7 @@ CD "%BINARY_DIR%"
 echo Build assembly archive...
 echo.
 
-"%ZIP_TOOL%" a -tzip -mx9 -r "%FILENAME_BINARY%" ce2.0 ce3.5 net2.0 net2.0.unsigned net3.5 net4.0 net4.0.unsigned net4.5 net4.6 net4.7 winrt uwp netstandard unity sl4 sl5 wp7.0 wp7.1 wp8.0 monodroid winmd portable interop ..\..\THANKS ..\..\COPYING -xr^^!Documentation >> %LOGFILE% 2>&1
+"%ZIP_TOOL%" a -tzip -mx9 -r "%FILENAME_BINARY%" ce2.0 ce3.5 net2.0 net2.0.unsigned net3.5 net4.0 net4.0.unsigned net4.5 net4.6 net4.7 net4.8 net5.0 net6.0 winrt uwp netcoreapp netstandard unity wp7.0 wp7.1 wp8.0 winmd portable interop ..\..\THANKS ..\..\COPYING -xr^^!Documentation >> %LOGFILE% 2>&1
 if ERRORLEVEL 1 GOTO ERROR_OPERATION
 
 echo Build assembly archive - demo clients...
@@ -193,7 +195,7 @@ FOR /F "tokens=1,2 delims= " %%b IN (build_deployment_source_export.txt) DO (
 )
 
 CD "%SOURCE_EXPORT_DIR%"
-"%ZIP_TOOL%" a -tzip -mx9 -r "%FILENAME_SOURCE%" Base\Source\lib\*.* Base\Source\Bindings\*.* Base\Source\interop\*.* Base\Source\test\src\*.* Base\Clients\*.* Base\3rdparty\*.* Base\Key\*.* Base\zxing.sln Base\zxing.ce.sln Base\zxing.vs2012.sln Base\zxing.vs2015.sln Base\zxing.vs2017.sln Base\zxing.monoandroid.sln Base\zxing.monotouch.sln Base\zxing.nunit Base\THANKS Base\COPYING WinMD\Source\lib\*.* WinMD\Clients\*.* WinMD\Key\*.* WinMD\zxing.vs2012.sln -xr^^!..svnbridge >> %LOGFILE% 2>&1
+"%ZIP_TOOL%" a -tzip -mx9 -r "%FILENAME_SOURCE%" Base\Source\lib\*.* Base\Source\Bindings\*.* Base\Source\interop\*.* Base\Source\test\src\*.* Base\Clients\*.* Base\3rdparty\*.* Base\Key\*.* Base\zxing.sln Base\zxing.ce.sln Base\zxing.vs2012.sln Base\zxing.vs2015.sln Base\zxing.vs2017.sln Base\zxing.vs2019.sln Base\zxing.vs2022.sln Base\zxing.monoandroid.sln Base\zxing.monotouch.sln Base\zxing.nunit Base\THANKS Base\COPYING WinMD\Source\lib\*.* WinMD\Clients\*.* WinMD\Key\*.* WinMD\zxing.vs2012.sln -xr^^!..svnbridge >> %LOGFILE% 2>&1
 CD "%CURRENT_DIR%"
 
 RMDIR /S /Q "%SOURCE_EXPORT_DIR%" >NUL: 2>&1

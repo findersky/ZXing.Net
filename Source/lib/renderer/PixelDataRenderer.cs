@@ -22,7 +22,7 @@ using Color = UnityEngine.Color32;
 #elif MONOANDROID
 using Android.Graphics;
 #elif (PORTABLE || NETSTANDARD)
-#elif (NET47 || NET46 || NET45 || NET40 || NET35 || NET20 || WindowsCE)
+#elif (NET48 || NET47 || NET46 || NET45 || NET40 || NET35 || NET20)
 using System.Drawing;
 #elif NETFX_CORE
 using Windows.UI;
@@ -113,7 +113,7 @@ namespace ZXing.Rendering
 #if UNITY
          Foreground = UnityEngine.Color.black;
          Background = UnityEngine.Color.white;
-#elif (NET47 || NET46 || NET45 || NET40 || NET35 || NET20 || WindowsCE || PORTABLE || NETSTANDARD || MONOANDROID)
+#elif (NET48 || NET47 || NET46 || NET45 || NET40 || NET35 || NET20 || PORTABLE || NETSTANDARD || MONOANDROID)
             Foreground = Color.Black;
             Background = Color.White;
 #else
@@ -193,10 +193,10 @@ namespace ZXing.Rendering
                         for (var pixelsizeWidth = 0; pixelsizeWidth < pixelsize; pixelsizeWidth++)
                         {
 #if UNITY
-                     pixels[index++] = color.b;
-                     pixels[index++] = color.g;
-                     pixels[index++] = color.r;
-                     pixels[index++] = color.a;
+                            pixels[index++] = color.b;
+                            pixels[index++] = color.g;
+                            pixels[index++] = color.r;
+                            pixels[index++] = color.a;
 #else
                             pixels[index++] = color.B;
                             pixels[index++] = color.G;
@@ -208,10 +208,10 @@ namespace ZXing.Rendering
                     for (var x = pixelsize * matrix.Width; x < width; x++)
                     {
 #if UNITY
-                  pixels[index++] = Background.b;
-                  pixels[index++] = Background.g;
-                  pixels[index++] = Background.r;
-                  pixels[index++] = Background.a;
+                        pixels[index++] = Background.b;
+                        pixels[index++] = Background.g;
+                        pixels[index++] = Background.r;
+                        pixels[index++] = Background.a;
 #else
                         pixels[index++] = Background.B;
                         pixels[index++] = Background.G;
@@ -226,10 +226,10 @@ namespace ZXing.Rendering
                 for (var x = 0; x < width; x++)
                 {
 #if UNITY
-               pixels[index++] = Background.b;
-               pixels[index++] = Background.g;
-               pixels[index++] = Background.r;
-               pixels[index++] = Background.a;
+                    pixels[index++] = Background.b;
+                    pixels[index++] = Background.g;
+                    pixels[index++] = Background.r;
+                    pixels[index++] = Background.a;
 #else
                     pixels[index++] = Background.B;
                     pixels[index++] = Background.G;

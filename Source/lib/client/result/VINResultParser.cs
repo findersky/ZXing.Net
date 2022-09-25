@@ -25,7 +25,7 @@ namespace ZXing.Client.Result
     /// </summary>
     public class VINResultParser : ResultParser
     {
-#if SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE || PORTABLE || UNITY || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2
+#if NETFX_CORE || PORTABLE || UNITY || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2
         private static readonly Regex IOQ = new Regex("[IOQ]");
         private static readonly Regex AZ09 = new Regex(@"\A(?:" + "[A-Z0-9]{17}" + @")\z");
 #else
@@ -33,6 +33,11 @@ namespace ZXing.Client.Result
       private static readonly Regex AZ09 = new Regex(@"\A(?:" + "[A-Z0-9]{17}" + @")\z", RegexOptions.Compiled);
 #endif
 
+        /// <summary>
+        /// attempt to parse the raw result to the specific type
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
         public override ParsedResult parse(ZXing.Result result)
         {
             try

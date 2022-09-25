@@ -26,11 +26,7 @@ namespace ZXing.Test
     [TestFixture]
     public class BitmapLuminanceSourceTests
     {
-#if !SILVERLIGHT
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-#else
-      private static readonly DanielVaughan.Logging.ILog Log = DanielVaughan.Logging.LogManager.GetLog(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-#endif
 
         private const string samplePicRelPath = @"../../../Source/test/data/luminance/01.jpg";
 
@@ -96,11 +92,7 @@ namespace ZXing.Test
                 luminances = new byte[width * height];
 
                 // The underlying raster of image consists of bytes with the luminance values
-#if WindowsCE
-            var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-#else
                 var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-#endif
                 try
                 {
                     var stride = Math.Abs(data.Stride);
@@ -126,7 +118,6 @@ namespace ZXing.Test
                         var buffer = new byte[stride];
                         var ptrInBitmap = data.Scan0;
 
-#if !WindowsCE
                         // prepare palette for 1 and 8 bit indexed bitmaps
                         var luminancePalette = new byte[bitmap.Palette.Entries.Length];
                         for (var index = 0; index < bitmap.Palette.Entries.Length; index++)
@@ -141,7 +132,6 @@ namespace ZXing.Test
                         {
                             pixelWidth = 40;
                         }
-#endif
 
                         for (int y = 0; y < height; y++)
                         {
@@ -150,12 +140,11 @@ namespace ZXing.Test
 #if NET40
                             ptrInBitmap = IntPtr.Add(ptrInBitmap, strideStep);
 #else
-                     ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
+                            ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
 #endif
                             var offset = y * width;
                             switch (pixelWidth)
                             {
-#if !WindowsCE
                                 case 0:
                                     for (int x = 0; x * 8 < width; x++)
                                     {
@@ -172,7 +161,6 @@ namespace ZXing.Test
                                         luminances[offset + x] = luminancePalette[buffer[x]];
                                     }
                                     break;
-#endif
                                 case 2:
                                     // should be RGB565 or RGB555, assume RGB565
                                     {
@@ -258,11 +246,7 @@ namespace ZXing.Test
 
                 // In order to measure pure decoding speed, we convert the entire image to a greyscale array
                 // The underlying raster of image consists of bytes with the luminance values
-#if WindowsCE
-         var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-#else
                 var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-#endif
                 try
                 {
                     var stride = Math.Abs(data.Stride);
@@ -288,7 +272,6 @@ namespace ZXing.Test
                         var buffer = new byte[stride];
                         var ptrInBitmap = data.Scan0;
 
-#if !WindowsCE
                         // prepare palette for 1 and 8 bit indexed bitmaps
                         var luminancePalette = new byte[bitmap.Palette.Entries.Length];
                         for (var index = 0; index < bitmap.Palette.Entries.Length; index++)
@@ -303,7 +286,6 @@ namespace ZXing.Test
                         {
                             pixelWidth = 40;
                         }
-#endif
 
                         for (int y = 0; y < height; y++)
                         {
@@ -312,12 +294,11 @@ namespace ZXing.Test
 #if NET40
                             ptrInBitmap = IntPtr.Add(ptrInBitmap, strideStep);
 #else
-                     ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
+                            ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
 #endif
                             var offset = y * width;
                             switch (pixelWidth)
                             {
-#if !WindowsCE
                                 case 0:
                                     for (int x = 0; x * 8 < width; x++)
                                     {
@@ -334,7 +315,6 @@ namespace ZXing.Test
                                         luminances[offset + x] = luminancePalette[buffer[x]];
                                     }
                                     break;
-#endif
                                 case 2:
                                     // should be RGB565 or RGB555, assume RGB565
                                     {
@@ -434,11 +414,7 @@ namespace ZXing.Test
 
                 // In order to measure pure decoding speed, we convert the entire image to a greyscale array
                 // The underlying raster of image consists of bytes with the luminance values
-#if WindowsCE
-         var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-#else
                 var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-#endif
                 try
                 {
                     var stride = Math.Abs(data.Stride);
@@ -469,7 +445,6 @@ namespace ZXing.Test
                         var buffer = new byte[strideBlockSize];
                         var ptrInBitmap = data.Scan0;
 
-#if !WindowsCE
                         // prepare palette for 1 and 8 bit indexed bitmaps
                         var luminancePalette = new byte[bitmap.Palette.Entries.Length];
                         for (var index = 0; index < bitmap.Palette.Entries.Length; index++)
@@ -484,7 +459,6 @@ namespace ZXing.Test
                         {
                             pixelWidth = 40;
                         }
-#endif
 
                         for (int y = 0; y < height; y += strideBlockCount)
                         {
@@ -498,12 +472,11 @@ namespace ZXing.Test
 #if NET40
                             ptrInBitmap = IntPtr.Add(ptrInBitmap, strideStep);
 #else
-                     ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
+                            ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
 #endif
                             var offset = y * width;
                             switch (pixelWidth)
                             {
-#if !WindowsCE
                                 case 0:
                                     for (int x = 0; x * 8 < width; x++)
                                     {
@@ -520,7 +493,6 @@ namespace ZXing.Test
                                         luminances[offset + x] = luminancePalette[buffer[x]];
                                     }
                                     break;
-#endif
                                 case 2:
                                     // should be RGB565 or RGB555, assume RGB565
                                     {
@@ -650,11 +622,7 @@ namespace ZXing.Test
 
                 // In order to measure pure decoding speed, we convert the entire image to a greyscale array
                 // The underlying raster of image consists of bytes with the luminance values
-#if WindowsCE
-            var data = newBitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-#else
                 var data = newBitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, newBitmap.PixelFormat);
-#endif
                 try
                 {
                     var stride = Math.Abs(data.Stride);
@@ -680,7 +648,6 @@ namespace ZXing.Test
                         var buffer = new byte[stride];
                         var ptrInBitmap = data.Scan0;
 
-#if !WindowsCE
                         // prepare palette for 1 and 8 bit indexed bitmaps
                         var luminancePalette = new byte[newBitmap.Palette.Entries.Length];
                         for (var index = 0; index < newBitmap.Palette.Entries.Length; index++)
@@ -693,7 +660,6 @@ namespace ZXing.Test
                         {
                             pixelWidth = 40;
                         }
-#endif
 
                         for (int y = 0; y < height; y++)
                         {
@@ -702,12 +668,11 @@ namespace ZXing.Test
 #if NET40
                             ptrInBitmap = IntPtr.Add(ptrInBitmap, strideStep);
 #else
-                     ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
+                            ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
 #endif
                             var offset = y * width;
                             switch (pixelWidth)
                             {
-#if !WindowsCE
                                 case 0:
                                     for (int x = 0; x * 8 < width; x++)
                                     {
@@ -724,7 +689,6 @@ namespace ZXing.Test
                                         luminances[offset + x] = luminancePalette[buffer[x]];
                                     }
                                     break;
-#endif
                                 case 2:
                                     // should be RGB565 or RGB555, assume RGB565
                                     {

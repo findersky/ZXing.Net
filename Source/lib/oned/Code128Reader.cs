@@ -238,9 +238,21 @@ namespace ZXing.OneD
             return code >= 0;
         }
 
-        override public Result decodeRow(int rowNumber, BitArray row, IDictionary<DecodeHintType, object> hints)
+        /// <summary>
+        ///   <p>Attempts to decode a one-dimensional barcode format given a single row of
+        /// an image.</p>
+        /// </summary>
+        /// <param name="rowNumber">row number from top of the row</param>
+        /// <param name="row">the black/white pixel data of the row</param>
+        /// <param name="hints">decode hints</param>
+        /// <returns>
+        ///   <see cref="Result"/>containing encoded string and start/end of barcode or null, if an error occurs or barcode cannot be found
+        /// </returns>
+        public override Result decodeRow(int rowNumber, BitArray row, IDictionary<DecodeHintType, object> hints)
         {
             bool convertFNC1 = hints != null && hints.ContainsKey(DecodeHintType.ASSUME_GS1);
+
+            int symbologyModifier = 0;
 
             int[] startPatternInfo = findStartPattern(row);
             if (startPatternInfo == null)
@@ -365,6 +377,15 @@ namespace ZXing.OneD
                             switch (code)
                             {
                                 case CODE_FNC_1:
+                                    if (result.Length == 0)
+                                    {
+                                        // FNC1 at first or second character determines the symbology
+                                        symbologyModifier = 1;
+                                    }
+                                    else if (result.Length == 1)
+                                    {
+                                        symbologyModifier = 2;
+                                    }
                                     if (convertFNC1)
                                     {
                                         if (result.Length == 0)
@@ -381,6 +402,8 @@ namespace ZXing.OneD
                                     }
                                     break;
                                 case CODE_FNC_2:
+                                    symbologyModifier = 4;
+                                    break;
                                 case CODE_FNC_3:
                                     // do nothing?
                                     break;
@@ -438,6 +461,15 @@ namespace ZXing.OneD
                             switch (code)
                             {
                                 case CODE_FNC_1:
+                                    if (result.Length == 0)
+                                    {
+                                        // FNC1 at first or second character determines the symbology
+                                        symbologyModifier = 1;
+                                    }
+                                    else if (result.Length == 1)
+                                    {
+                                        symbologyModifier = 2;
+                                    }
                                     if (convertFNC1)
                                     {
                                         if (result.Length == 0)
@@ -454,6 +486,8 @@ namespace ZXing.OneD
                                     }
                                     break;
                                 case CODE_FNC_2:
+                                    symbologyModifier = 4;
+                                    break;
                                 case CODE_FNC_3:
                                     // do nothing?
                                     break;
@@ -507,6 +541,15 @@ namespace ZXing.OneD
                             switch (code)
                             {
                                 case CODE_FNC_1:
+                                    if (result.Length == 0)
+                                    {
+                                        // FNC1 at first or second character determines the symbology
+                                        symbologyModifier = 1;
+                                    }
+                                    else if (result.Length == 1)
+                                    {
+                                        symbologyModifier = 2;
+                                    }
                                     if (convertFNC1)
                                     {
                                         if (result.Length == 0)
@@ -606,7 +649,7 @@ namespace ZXing.OneD
                 rawBytes[i] = rawCodes[i];
             }
 
-            return new Result(
+            var resultObject = new Result(
                result.ToString(),
                rawBytes,
                new[]
@@ -615,6 +658,8 @@ namespace ZXing.OneD
                   new ResultPoint(right, rowNumber)
                   },
                BarcodeFormat.CODE_128);
+            resultObject.putMetadata(ResultMetadataType.SYMBOLOGY_IDENTIFIER, "]C" + symbologyModifier);
+            return resultObject;
         }
     }
 }

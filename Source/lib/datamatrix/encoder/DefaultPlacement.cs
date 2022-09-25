@@ -42,22 +42,33 @@ namespace ZXing.Datamatrix.Encoder
             this.bits = new byte[numcols * numrows];
             SupportClass.Fill(this.bits, (byte)2); //Initialize with "not set" value
         }
-
+        /// <summary>
+        /// num rows
+        /// </summary>
         public int Numrows
         {
             get { return numrows; }
         }
-
+        /// <summary>
+        /// num cols
+        /// </summary>
         public int Numcols
         {
             get { return numcols; }
         }
-
+        /// <summary>
+        /// bits
+        /// </summary>
         public byte[] Bits
         {
             get { return bits; }
         }
-
+        /// <summary>
+        /// get a specific bit
+        /// </summary>
+        /// <param name="col"></param>
+        /// <param name="row"></param>
+        /// <returns></returns>
         public bool getBit(int col, int row)
         {
             return bits[row * numcols + col] == 1;
@@ -68,11 +79,13 @@ namespace ZXing.Datamatrix.Encoder
             bits[row * numcols + col] = (byte)(bit ? 1 : 0);
         }
 
-        private bool hasBit(int col, int row)
+        private bool noBit(int col, int row)
         {
-            return bits[row * numcols + col] < 2;
+            return bits[row * numcols + col] == 2;
         }
-
+        /// <summary>
+        /// place
+        /// </summary>
         public void place()
         {
             int pos = 0;
@@ -81,7 +94,7 @@ namespace ZXing.Datamatrix.Encoder
 
             do
             {
-                /* repeatedly first check for one of the special corner cases, then... */
+                // repeatedly first check for one of the special corner cases, then...
                 if ((row == numrows) && (col == 0))
                 {
                     corner1(pos++);
@@ -98,10 +111,10 @@ namespace ZXing.Datamatrix.Encoder
                 {
                     corner4(pos++);
                 }
-                /* sweep upward diagonally, inserting successive characters... */
+                // sweep upward diagonally, inserting successive characters...
                 do
                 {
-                    if ((row < numrows) && (col >= 0) && !hasBit(col, row))
+                    if ((row < numrows) && (col >= 0) && noBit(col, row))
                     {
                         utah(row, col, pos++);
                     }
@@ -111,10 +124,10 @@ namespace ZXing.Datamatrix.Encoder
                 row++;
                 col += 3;
 
-                /* and then sweep downward diagonally, inserting successive characters, ... */
+                // and then sweep downward diagonally, inserting successive characters, ...
                 do
                 {
-                    if ((row >= 0) && (col < numcols) && !hasBit(col, row))
+                    if ((row >= 0) && (col < numcols) && noBit(col, row))
                     {
                         utah(row, col, pos++);
                     }
@@ -124,11 +137,11 @@ namespace ZXing.Datamatrix.Encoder
                 row += 3;
                 col++;
 
-                /* ...until the entire array is scanned */
+                // ...until the entire array is scanned
             } while ((row < numrows) || (col < numcols));
 
-            /* Lastly, if the lower righthand corner is untouched, fill in fixed pattern */
-            if (!hasBit(numcols - 1, numrows - 1))
+            // Lastly, if the lower right-hand corner is untouched, fill in fixed pattern
+            if (noBit(numcols - 1, numrows - 1))
             {
                 setBit(numcols - 1, numrows - 1, true);
                 setBit(numcols - 2, numrows - 2, true);

@@ -27,30 +27,14 @@ namespace ZXing.OneD
     /// </summary>
     public sealed class Code39Writer : OneDimensionalCodeWriter
     {
+        private static readonly IList<BarcodeFormat> supportedWriteFormats = new List<BarcodeFormat> { BarcodeFormat.CODE_39 };
+
         /// <summary>
-        /// Encode the contents following specified format.
-        /// {@code width} and {@code height} are required size. This method may return bigger size
-        /// {@code BitMatrix} when specified size is too small. The user can set both {@code width} and
-        /// {@code height} to zero to get minimum size barcode. If negative value is set to {@code width}
-        /// or {@code height}, {@code IllegalArgumentException} is thrown.
+        /// returns supported formats
         /// </summary>
-        /// <param name="contents"></param>
-        /// <param name="format"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="hints"></param>
-        /// <returns></returns>
-        public override BitMatrix encode(String contents,
-                                BarcodeFormat format,
-                                int width,
-                                int height,
-                                IDictionary<EncodeHintType, object> hints)
+        protected override IList<BarcodeFormat> SupportedWriteFormats
         {
-            if (format != BarcodeFormat.CODE_39)
-            {
-                throw new ArgumentException("Can only encode CODE_39, but got " + format);
-            }
-            return base.encode(contents, format, width, height, hints);
+            get { return supportedWriteFormats; }
         }
 
         /// <summary>
@@ -66,7 +50,7 @@ namespace ZXing.OneD
             if (length > 80)
             {
                 throw new ArgumentException(
-                   "Requested contents should be less than 80 digits long, but got " + length);
+                    "Requested contents should be less than 80 digits long, but got " + length);
             }
             for (int i = 0; i < length; i++)
             {
@@ -81,7 +65,7 @@ namespace ZXing.OneD
                     if (length > 80)
                     {
                         throw new ArgumentException(
-                           "Requested contents should be less than 80 digits long, but got " + length + " (extended full ascii mode)");
+                            "Requested contents should be less than 80 digits long, but got " + length + " (extended full ascii mode)");
                     }
                     break;
                 }
@@ -92,7 +76,7 @@ namespace ZXing.OneD
             var result = new bool[codeWidth];
             toIntArray(Code39Reader.ASTERISK_ENCODING, widths);
             int pos = appendPattern(result, 0, widths, true);
-            int[] narrowWhite = { 1 };
+            int[] narrowWhite = {1};
             pos += appendPattern(result, pos, narrowWhite, false);
             //append next character to byte matrix
             for (int i = 0; i < length; i++)
@@ -122,7 +106,7 @@ namespace ZXing.OneD
             var extendedContent = new StringBuilder();
             for (int i = 0; i < length; i++)
             {
-                var character = (int)contents[i];
+                var character = (int) contents[i];
                 switch (character)
                 {
                     case 0:
@@ -147,45 +131,45 @@ namespace ZXing.OneD
                         if (character <= 26)
                         {
                             extendedContent.Append("$");
-                            extendedContent.Append((char)('A' + (character - 1)));
+                            extendedContent.Append((char) ('A' + (character - 1)));
                         }
                         else if (character < 32)
                         {
                             extendedContent.Append("%");
-                            extendedContent.Append((char)('A' + (character - 27)));
+                            extendedContent.Append((char) ('A' + (character - 27)));
                         }
                         else if (character <= ',' || character == '/' || character == ':')
                         {
                             extendedContent.Append("/");
-                            extendedContent.Append((char)('A' + (character - 33)));
+                            extendedContent.Append((char) ('A' + (character - 33)));
                         }
                         else if (character <= '9')
                         {
-                            extendedContent.Append((char)('0' + (character - 48)));
+                            extendedContent.Append((char) ('0' + (character - 48)));
                         }
                         else if (character <= '?')
                         {
                             extendedContent.Append("%");
-                            extendedContent.Append((char)('F' + (character - 59)));
+                            extendedContent.Append((char) ('F' + (character - 59)));
                         }
                         else if (character <= 'Z')
                         {
-                            extendedContent.Append((char)('A' + (character - 65)));
+                            extendedContent.Append((char) ('A' + (character - 65)));
                         }
                         else if (character <= '_')
                         {
                             extendedContent.Append("%");
-                            extendedContent.Append((char)('K' + (character - 91)));
+                            extendedContent.Append((char) ('K' + (character - 91)));
                         }
                         else if (character <= 'z')
                         {
                             extendedContent.Append("+");
-                            extendedContent.Append((char)('A' + (character - 97)));
+                            extendedContent.Append((char) ('A' + (character - 97)));
                         }
                         else if (character <= 127)
                         {
                             extendedContent.Append("%");
-                            extendedContent.Append((char)('P' + (character - 123)));
+                            extendedContent.Append((char) ('P' + (character - 123)));
                         }
                         else
                         {

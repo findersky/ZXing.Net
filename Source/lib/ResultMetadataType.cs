@@ -97,6 +97,12 @@ namespace ZXing
         /// <summary>
         /// Aztec-specific metadata
         /// </summary>
-        AZTEC_EXTRA_METADATA
+        AZTEC_EXTRA_METADATA,
+
+        /// <summary>
+        /// Barcode Symbology Identifier.
+        /// Note: According to the GS1 specification the identifier may have to replace a leading FNC1/GS character when prepending to the barcode content.
+        /// </summary>
+        SYMBOLOGY_IDENTIFIER
     }
 }

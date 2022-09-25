@@ -104,7 +104,7 @@ namespace ZXing.Windows.Compatibility
         /// <param name="content">The content.</param>
         /// <param name="options">The options.</param>
         /// <returns></returns>
-        public Bitmap Render(BitMatrix matrix, BarcodeFormat format, string content, EncodingOptions options)
+        virtual public Bitmap Render(BitMatrix matrix, BarcodeFormat format, string content, EncodingOptions options)
         {
             var width = matrix.Width;
             var height = matrix.Height;
@@ -209,7 +209,7 @@ namespace ZXing.Windows.Compatibility
                     {
                         var textAreaHeight = font.Height;
 
-                        emptyArea = height + 10 > textAreaHeight ? textAreaHeight : 0;
+                        emptyArea = height > textAreaHeight ? textAreaHeight : 0;
 
                         if (emptyArea > 0)
                         {
@@ -241,18 +241,30 @@ namespace ZXing.Windows.Compatibility
                 {
                     switch (format)
                     {
+                        case BarcodeFormat.UPC_E:
                         case BarcodeFormat.EAN_8:
                             if (content.Length < 8)
                                 content = OneDimensionalCodeWriter.CalculateChecksumDigitModulo10(content);
-                            content = content.Insert(4, "   ");
+                            if (content.Length > 4)
+                                content = content.Insert(4, "   ");
                             break;
                         case BarcodeFormat.EAN_13:
                             if (content.Length < 13)
                                 content = OneDimensionalCodeWriter.CalculateChecksumDigitModulo10(content);
-                            content = content.Insert(7, "   ");
-                            content = content.Insert(1, "   ");
+                            if (content.Length > 7)
+                                content = content.Insert(7, "   ");
+                            if (content.Length > 1)
+                                content = content.Insert(1, "   ");
                             break;
-                        default:
+                        case BarcodeFormat.UPC_A:
+                            if (content.Length < 12)
+                                content = OneDimensionalCodeWriter.CalculateChecksumDigitModulo10(content);
+                            if (content.Length > 11)
+                                content = content.Insert(11, "   ");
+                            if (content.Length > 6)
+                                content = content.Insert(6, "   ");
+                            if (content.Length > 1)
+                                content = content.Insert(1, "   ");
                             break;
                     }
                     var brush = new SolidBrush(Foreground);

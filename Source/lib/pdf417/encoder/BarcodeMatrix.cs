@@ -32,6 +32,7 @@ namespace ZXing.PDF417.Internal
         /// <summary>
         /// <param name="height">the height of the matrix (Rows)</param>
         /// <param name="width">the width of the matrix (Cols)</param>
+        /// <param name="compact">defines if a compact PDF417 should be encoded</param>
         /// </summary>
         internal BarcodeMatrix(int height, int width, bool compact)
         {
@@ -53,13 +54,6 @@ namespace ZXing.PDF417.Internal
             matrix[y][x] = value;
         }
 
-        /*
-        internal void setMatrix(int x, int y, bool black)
-        {
-           set(x, y, (sbyte) (black ? 1 : 0));
-        }
-        */
-
         internal void startRow()
         {
             ++currentRow;
@@ -74,13 +68,6 @@ namespace ZXing.PDF417.Internal
         {
             return getScaledMatrix(1, 1);
         }
-
-        /*
-        internal sbyte[][] getScaledMatrix(int Scale)
-        {
-           return getScaledMatrix(Scale, Scale);
-        }
-        */
 
         internal sbyte[][] getScaledMatrix(int xScale, int yScale)
         {

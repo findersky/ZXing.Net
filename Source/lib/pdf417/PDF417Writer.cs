@@ -111,6 +111,18 @@ namespace ZXing.PDF417
                         }
                     }
                 }
+                if (hints.ContainsKey(EncodeHintType.PDF417_IMAGE_ASPECT_RATIO) && hints[EncodeHintType.PDF417_IMAGE_ASPECT_RATIO] != null)
+                {
+                    var value = hints[EncodeHintType.PDF417_IMAGE_ASPECT_RATIO];
+                    try
+                    {
+                        encoder.setDesiredAspectRatio(Convert.ToSingle(value));
+                    }
+                    catch
+                    {
+                        // User passed in something that wasn't convertible to single.
+                    }
+                }
                 if (hints.ContainsKey(EncodeHintType.ERROR_CORRECTION) && hints[EncodeHintType.ERROR_CORRECTION] != null)
                 {
                     var value = hints[EncodeHintType.ERROR_CORRECTION];
@@ -130,20 +142,17 @@ namespace ZXing.PDF417
                 }
                 if (hints.ContainsKey(EncodeHintType.CHARACTER_SET))
                 {
-#if !SILVERLIGHT || WINDOWS_PHONE
-                    var encoding = (String)hints[EncodeHintType.CHARACTER_SET];
-                    if (encoding != null)
-                    {
-                        encoder.setEncoding(encoding);
-                    }
-#else
-               // Silverlight supports only UTF-8 and UTF-16 out-of-the-box
-               encoder.setEncoding("UTF-8");
-#endif
+                    encoder.setEncoding(StringUtils.UTF8);
                 }
                 if (hints.ContainsKey(EncodeHintType.DISABLE_ECI) && hints[EncodeHintType.DISABLE_ECI] != null)
                 {
                     encoder.setDisableEci(Convert.ToBoolean(hints[EncodeHintType.DISABLE_ECI].ToString()));
+                }
+
+                // Check for PDF417 Macro options
+                if (hints.ContainsKey(EncodeHintType.PDF417_MACRO_META_DATA))
+                {
+                    encoder.setMetaData((PDF417MacroMetadata)hints[EncodeHintType.PDF417_MACRO_META_DATA]);
                 }
             }
 
@@ -157,7 +166,6 @@ namespace ZXing.PDF417
         /// <param name="format">The barcode format to generate</param>
         /// <param name="width">The preferred width in pixels</param>
         /// <param name="height">The preferred height in pixels</param>
-        /// <param name="aspectRatio">The height of a row in the barcode</param>
         /// <returns>
         /// The generated barcode as a Matrix of unsigned bytes (0 == black, 255 == white)
         /// </returns>

@@ -21,8 +21,6 @@ using System.IO;
 
 #if NETFX_CORE
 using Windows.UI;
-#elif SILVERLIGHT
-using System.Windows.Media;
 #elif UNITY
 using UnityEngine;
 #elif !(PORTABLE || NETSTANDARD)
@@ -39,7 +37,13 @@ namespace ZXing.Rendering
     /// </summary>
     public class SvgRenderer : IBarcodeRenderer<SvgRenderer.SvgImage>
     {
+        /// <summary>
+        /// the default font name if nothing else is set (Arial)
+        /// </summary>
         public const string DefaultFontName = "Arial";
+        /// <summary>
+        /// the default font size if nothing else is set (10)
+        /// </summary>
         public const int DefaultFontSize = 10;
 
 #if !UNITY
@@ -144,7 +148,7 @@ namespace ZXing.Rendering
         /// </summary>
         public SvgRenderer()
         {
-#if NETFX_CORE || SILVERLIGHT
+#if NETFX_CORE
          Foreground = Colors.Black;
          Background = Colors.White;
 #elif UNITY
@@ -234,16 +238,30 @@ namespace ZXing.Rendering
         {
             switch (format)
             {
+                case BarcodeFormat.UPC_E:
                 case BarcodeFormat.EAN_8:
                     if (content.Length < 8)
                         content = OneDimensionalCodeWriter.CalculateChecksumDigitModulo10(content);
-                    content = content.Insert(4, "   ");
+                    if (content.Length > 4)
+                        content = content.Insert(4, "   ");
                     break;
                 case BarcodeFormat.EAN_13:
                     if (content.Length < 13)
                         content = OneDimensionalCodeWriter.CalculateChecksumDigitModulo10(content);
-                    content = content.Insert(7, "   ");
-                    content = content.Insert(1, "   ");
+                    if (content.Length > 7)
+                        content = content.Insert(7, "   ");
+                    if (content.Length > 1)
+                        content = content.Insert(1, "   ");
+                    break;
+                case BarcodeFormat.UPC_A:
+                    if (content.Length < 12)
+                        content = OneDimensionalCodeWriter.CalculateChecksumDigitModulo10(content);
+                    if (content.Length > 11)
+                        content = content.Insert(11, "   ");
+                    if (content.Length > 6)
+                        content = content.Insert(6, "   ");
+                    if (content.Length > 1)
+                        content = content.Insert(1, "   ");
                     break;
             }
 
@@ -443,7 +461,7 @@ namespace ZXing.Rendering
             internal static string GetBackgroundStyle(Color color)
             {
                 double alpha = ConvertAlpha(color);
-                return string.Format("style=\"background-color:rgb({0},{1},{2});background-color:rgba({3});\"",
+                return string.Format("style=\"background-color:rgb({0},{1},{2});background-color:rgba({0}, {1}, {2}, {3});\"",
                     color.R, color.G, color.B, alpha);
             }
 
@@ -466,7 +484,7 @@ namespace ZXing.Rendering
          internal static string GetBackgroundStyle(Color32 color)
          {
             double alpha = ConvertAlpha(color);
-            return string.Format("style=\"background-color:rgb({0},{1},{2});background-color:rgba({3});\"",
+            return string.Format("style=\"background-color:rgb({0},{1},{2});background-color:rgba({0},{1},{2},{3});\"",
                 color.r, color.g, color.b, alpha);
          }
 

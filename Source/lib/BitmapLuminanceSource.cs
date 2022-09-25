@@ -47,6 +47,11 @@ namespace ZXing
             CalculateLuminanceValues(bitmap, luminances);
         }
 
+        /// <summary>
+        /// calculates the luminance values for bitmaps
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="luminances"></param>
         protected static void CalculateLuminanceValues(Bitmap bitmap, byte[] luminances)
         {
             var height = bitmap.Height;
@@ -54,11 +59,7 @@ namespace ZXing
 
             // In order to measure pure decoding speed, we convert the entire image to a greyscale array
             // The underlying raster of image consists of bytes with the luminance values
-#if WindowsCE
-            var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-#else
             var data = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-#endif
             try
             {
                 var stride = Math.Abs(data.Stride);
@@ -71,7 +72,6 @@ namespace ZXing
                 }
                 else
                 {
-#if !WindowsCE
                     if (bitmap.PixelFormat == PixelFormat.Format32bppArgb ||
                         bitmap.PixelFormat == PixelFormat.Format32bppPArgb)
                     {
@@ -82,11 +82,9 @@ namespace ZXing
                     {
                         pixelWidth = 41;
                     }
-#endif
 
                     switch (pixelWidth)
                     {
-#if !WindowsCE
                         case 0:
                             if (bitmap.PixelFormat == PixelFormat.Format4bppIndexed)
                                 CalculateLuminanceValuesForIndexed4Bit(bitmap, data, luminances);
@@ -96,7 +94,6 @@ namespace ZXing
                         case 1:
                             CalculateLuminanceValuesForIndexed8Bit(bitmap, data, luminances);
                             break;
-#endif
                         case 2:
                             // should be RGB565 or RGB555, assume RGB565
                             CalculateLuminanceValues565(bitmap, data, luminances);
@@ -145,7 +142,12 @@ namespace ZXing
             }
         }
 
-#if !WindowsCE
+        /// <summary>
+        /// calculates the luminance values for 1-bit indexed bitmaps
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="data"></param>
+        /// <param name="luminances"></param>
         protected static void CalculateLuminanceValuesForIndexed1Bit(Bitmap bitmap, BitmapData data, byte[] luminances)
         {
             var height = data.Height;
@@ -174,7 +176,7 @@ namespace ZXing
             {
                 // copy a scanline not the whole bitmap because of memory usage
                 Marshal.Copy(ptrInBitmap, buffer, 0, stride);
-#if NET40 || NET45 || NET46 || NET47
+#if NET40 || NET45 || NET46 || NET47 || NET48
                 ptrInBitmap = IntPtr.Add(ptrInBitmap, strideStep);
 #else
                 ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
@@ -193,6 +195,12 @@ namespace ZXing
             }
         }
 
+        /// <summary>
+        /// calculates the luminance values for 4-bit indexed bitmaps
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="data"></param>
+        /// <param name="luminances"></param>
         protected static void CalculateLuminanceValuesForIndexed4Bit(Bitmap bitmap, BitmapData data, byte[] luminances)
         {
             if (bitmap.PixelFormat != PixelFormat.Format4bppIndexed)
@@ -225,7 +233,7 @@ namespace ZXing
             {
                 // copy a scanline not the whole bitmap because of memory usage
                 Marshal.Copy(ptrInBitmap, buffer, 0, stride);
-#if NET40 || NET45 || NET46 || NET47
+#if NET40 || NET45 || NET46 || NET47 || NET48
                 ptrInBitmap = IntPtr.Add(ptrInBitmap, strideStep);
 #else
                 ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
@@ -250,6 +258,12 @@ namespace ZXing
             }
         }
 
+        /// <summary>
+        /// calculates the luminance values for 8-bit indexed bitmaps
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="data"></param>
+        /// <param name="luminances"></param>
         protected static void CalculateLuminanceValuesForIndexed8Bit(Bitmap bitmap, BitmapData data, byte[] luminances)
         {
             var height = data.Height;
@@ -278,7 +292,7 @@ namespace ZXing
             {
                 // copy a scanline not the whole bitmap because of memory usage
                 Marshal.Copy(ptrInBitmap, buffer, 0, stride);
-#if NET40 || NET45 || NET46 || NET47
+#if NET40 || NET45 || NET46 || NET47 || NET48
                 ptrInBitmap = IntPtr.Add(ptrInBitmap, strideStep);
 #else
                 ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
@@ -290,8 +304,13 @@ namespace ZXing
                 }
             }
         }
-#endif
 
+        /// <summary>
+        /// calculates the luminance values for 565 encoded bitmaps
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="data"></param>
+        /// <param name="luminances"></param>
         private static void CalculateLuminanceValues565(Bitmap bitmap, BitmapData data, byte[] luminances)
         {
             var height = data.Height;
@@ -303,17 +322,13 @@ namespace ZXing
             var ptrInBitmap = data.Scan0;
 
             if (pixelWidth != 2)
-#if !WindowsCE
                 throw new InvalidOperationException("Unsupported pixel format: " + bitmap.PixelFormat);
-#else
-                throw new InvalidOperationException("Unsupported pixel format");
-#endif
 
             for (int y = 0; y < height; y++)
             {
                 // copy a scanline not the whole bitmap because of memory usage
                 Marshal.Copy(ptrInBitmap, buffer, 0, stride);
-#if NET40 || NET45 || NET46 || NET47
+#if NET40 || NET45 || NET46 || NET47 || NET48
                 ptrInBitmap = IntPtr.Add(ptrInBitmap, strideStep);
 #else
                 ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
@@ -338,6 +353,12 @@ namespace ZXing
             }
         }
 
+        /// <summary>
+        /// calculates the luminance values for 24-bit encoded bitmaps
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="data"></param>
+        /// <param name="luminances"></param>
         private static void CalculateLuminanceValues24Bit(Bitmap bitmap, BitmapData data, byte[] luminances)
         {
             var height = data.Height;
@@ -349,17 +370,13 @@ namespace ZXing
             var ptrInBitmap = data.Scan0;
 
             if (pixelWidth != 3)
-#if !WindowsCE
                 throw new InvalidOperationException("Unsupported pixel format: " + bitmap.PixelFormat);
-#else
-                throw new InvalidOperationException("Unsupported pixel format");
-#endif
 
             for (int y = 0; y < height; y++)
             {
                 // copy a scanline not the whole bitmap because of memory usage
                 Marshal.Copy(ptrInBitmap, buffer, 0, stride);
-#if NET40 || NET45 || NET46 || NET47
+#if NET40 || NET45 || NET46 || NET47 || NET48
                 ptrInBitmap = IntPtr.Add(ptrInBitmap, strideStep);
 #else
                 ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
@@ -377,6 +394,12 @@ namespace ZXing
             }
         }
 
+        /// <summary>
+        /// calculates the luminance values for 32-bit encoded bitmaps without respecting the alpha channel
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="data"></param>
+        /// <param name="luminances"></param>
         private static void CalculateLuminanceValues32BitWithoutAlpha(Bitmap bitmap, BitmapData data, byte[] luminances)
         {
             var height = data.Height;
@@ -389,17 +412,13 @@ namespace ZXing
             var maxIndex = 4 * width;
 
             if (pixelWidth != 4)
-#if !WindowsCE
                 throw new InvalidOperationException("Unsupported pixel format: " + bitmap.PixelFormat);
-#else
-                throw new InvalidOperationException("Unsupported pixel format");
-#endif
 
             for (int y = 0; y < height; y++)
             {
                 // copy a scanline not the whole bitmap because of memory usage
                 Marshal.Copy(ptrInBitmap, buffer, 0, stride);
-#if NET40 || NET45 || NET46 || NET47
+#if NET40 || NET45 || NET46 || NET47 || NET48
                 ptrInBitmap = IntPtr.Add(ptrInBitmap, strideStep);
 #else
                 ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
@@ -418,6 +437,7 @@ namespace ZXing
             }
         }
 
+        /// calculates the luminance values for 32-bit encoded bitmaps with alpha channel
         private static void CalculateLuminanceValues32BitWithAlpha(Bitmap bitmap, BitmapData data, byte[] luminances)
         {
             var height = data.Height;
@@ -430,17 +450,13 @@ namespace ZXing
             var maxIndex = 4 * width;
 
             if (pixelWidth != 4)
-#if !WindowsCE
                 throw new InvalidOperationException("Unsupported pixel format: " + bitmap.PixelFormat);
-#else
-                throw new InvalidOperationException("Unsupported pixel format");
-#endif
 
             for (int y = 0; y < height; y++)
             {
                 // copy a scanline not the whole bitmap because of memory usage
                 Marshal.Copy(ptrInBitmap, buffer, 0, stride);
-#if NET40 || NET45 || NET46 || NET47
+#if NET40 || NET45 || NET46 || NET47 || NET48
                 ptrInBitmap = IntPtr.Add(ptrInBitmap, strideStep);
 #else
                 ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);
@@ -466,6 +482,7 @@ namespace ZXing
             }
         }
 
+        /// calculates the luminance values for 32-bit CMYK encoded bitmaps (k is ignored at the momen)
         private static void CalculateLuminanceValues32BitCMYK(Bitmap bitmap, BitmapData data, byte[] luminances)
         {
             var height = data.Height;
@@ -478,17 +495,13 @@ namespace ZXing
             var maxIndex = 4 * width;
 
             if (pixelWidth != 4)
-#if !WindowsCE
                 throw new InvalidOperationException("Unsupported pixel format: " + bitmap.PixelFormat);
-#else
-                throw new InvalidOperationException("Unsupported pixel format");
-#endif
 
             for (int y = 0; y < height; y++)
             {
                 // copy a scanline not the whole bitmap because of memory usage
                 Marshal.Copy(ptrInBitmap, buffer, 0, stride);
-#if NET40 || NET45 || NET46 || NET47
+#if NET40 || NET45 || NET46 || NET47 || NET48
                 ptrInBitmap = IntPtr.Add(ptrInBitmap, strideStep);
 #else
                 ptrInBitmap = new IntPtr(ptrInBitmap.ToInt64() + strideStep);

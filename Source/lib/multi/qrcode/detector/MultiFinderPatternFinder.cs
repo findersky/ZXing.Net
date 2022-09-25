@@ -35,9 +35,8 @@ namespace ZXing.Multi.QrCode.Internal
     /// <author>Sean Owen</author>
     /// <author>Hannes Erven</author>
     /// </summary>
-    sealed class MultiFinderPatternFinder : FinderPatternFinder
+    public sealed class MultiFinderPatternFinder : FinderPatternFinder
     {
-
         private static readonly FinderPatternInfo[] EMPTY_RESULT_ARRAY = new FinderPatternInfo[0];
 
         // TODO MIN_MODULE_COUNT and MAX_MODULE_COUNT would be great hints to ask the user for
@@ -45,6 +44,7 @@ namespace ZXing.Multi.QrCode.Internal
 
         // max. legal count of modules per QR code edge (177)
         private static float MAX_MODULE_COUNT_PER_EDGE = 180;
+
         // min. legal count per modules per QR code edge (11)
         private static float MIN_MODULE_COUNT_PER_EDGE = 9;
 
@@ -79,14 +79,10 @@ namespace ZXing.Multi.QrCode.Internal
         /// <p>Creates a finder that will search the image for three finder patterns.</p>
         ///
         /// <param name="image">image to search</param>
+        /// <param name="resultPointCallback">callback for result points</param>
         /// </summary>
-        internal MultiFinderPatternFinder(BitMatrix image)
-           : base(image)
-        {
-        }
-
-        internal MultiFinderPatternFinder(BitMatrix image, ResultPointCallback resultPointCallback)
-           : base(image, resultPointCallback)
+        public MultiFinderPatternFinder(BitMatrix image, ResultPointCallback resultPointCallback)
+            : base(image, resultPointCallback)
         {
         }
 
@@ -113,14 +109,14 @@ namespace ZXing.Multi.QrCode.Internal
             if (size == 3)
             {
                 return new FinderPattern[][]
-                          {
-                         new FinderPattern[]
-                            {
-                               possibleCenters[0],
-                               possibleCenters[1],
-                               possibleCenters[2]
-                            }
-                          };
+                {
+                    new FinderPattern[]
+                    {
+                        possibleCenters[0],
+                        possibleCenters[1],
+                        possibleCenters[2]
+                    }
+                };
             }
 
             // Sort by estimated module size to speed up the upcoming checks
@@ -161,7 +157,7 @@ namespace ZXing.Multi.QrCode.Internal
 
                     // Compare the expected module sizes; if they are really off, skip
                     float vModSize12 = (p1.EstimatedModuleSize - p2.EstimatedModuleSize) /
-                        Math.Min(p1.EstimatedModuleSize, p2.EstimatedModuleSize);
+                                       Math.Min(p1.EstimatedModuleSize, p2.EstimatedModuleSize);
                     float vModSize12A = Math.Abs(p1.EstimatedModuleSize - p2.EstimatedModuleSize);
                     if (vModSize12A > DIFF_MODSIZE_CUTOFF && vModSize12 >= DIFF_MODSIZE_CUTOFF_PERCENT)
                     {
@@ -180,7 +176,7 @@ namespace ZXing.Multi.QrCode.Internal
 
                         // Compare the expected module sizes; if they are really off, skip
                         float vModSize23 = (p2.EstimatedModuleSize - p3.EstimatedModuleSize) /
-                            Math.Min(p2.EstimatedModuleSize, p3.EstimatedModuleSize);
+                                           Math.Min(p2.EstimatedModuleSize, p3.EstimatedModuleSize);
                         float vModSize23A = Math.Abs(p2.EstimatedModuleSize - p3.EstimatedModuleSize);
                         if (vModSize23A > DIFF_MODSIZE_CUTOFF && vModSize23 >= DIFF_MODSIZE_CUTOFF_PERCENT)
                         {
@@ -189,7 +185,7 @@ namespace ZXing.Multi.QrCode.Internal
                             break;
                         }
 
-                        FinderPattern[] test = { p1, p2, p3 };
+                        FinderPattern[] test = {p1, p2, p3};
                         ResultPoint.orderBestPatterns(test);
 
                         // Calculate the distances: a = topleft-bottomleft, b=topleft-topright, c = diagonal
@@ -214,7 +210,7 @@ namespace ZXing.Multi.QrCode.Internal
                         }
 
                         // Calculate the diagonal length by assuming a 90° angle at topleft
-                        float dCpy = (float)Math.Sqrt((double)dA * dA + (double)dB * dB);
+                        float dCpy = (float) Math.Sqrt((double) dA * dA + (double) dB * dB);
                         // Compare to the real distance in %
                         float vPyC = Math.Abs((dC - dCpy) / Math.Min(dC, dCpy));
 
@@ -238,6 +234,11 @@ namespace ZXing.Multi.QrCode.Internal
             return null;
         }
 
+        /// <summary>
+        /// try to find patterns
+        /// </summary>
+        /// <param name="hints"></param>
+        /// <returns></returns>
         public FinderPatternInfo[] findMulti(IDictionary<DecodeHintType, object> hints)
         {
             bool tryHarder = hints != null && hints.ContainsKey(DecodeHintType.TRY_HARDER);
@@ -261,7 +262,7 @@ namespace ZXing.Multi.QrCode.Internal
             for (int i = iSkip - 1; i < maxI; i += iSkip)
             {
                 // Get a row of black/white values
-                clearCounts(stateCount);
+                doClearCounts(stateCount);
                 int currentState = 0;
                 for (int j = 0; j < maxJ; j++)
                 {
@@ -269,26 +270,32 @@ namespace ZXing.Multi.QrCode.Internal
                     {
                         // Black pixel
                         if ((currentState & 1) == 1)
-                        { // Counting white pixels
+                        {
+                            // Counting white pixels
                             currentState++;
                         }
                         stateCount[currentState]++;
                     }
                     else
-                    { // White pixel
+                    {
+                        // White pixel
                         if ((currentState & 1) == 0)
-                        { // Counting black pixels
+                        {
+                            // Counting black pixels
                             if (currentState == 4)
-                            { // A winner?
+                            {
+                                // A winner?
                                 if (foundPatternCross(stateCount) && handlePossibleCenter(stateCount, i, j))
-                                { // Yes
-                                  // Clear state to start looking again
+                                {
+                                    // Yes
+                                    // Clear state to start looking again
                                     currentState = 0;
-                                    clearCounts(stateCount);
+                                    doClearCounts(stateCount);
                                 }
                                 else
-                                { // No, shift counts back by two
-                                    shiftCounts2(stateCount);
+                                {
+                                    // No, shift counts back by two
+                                    doShiftCounts2(stateCount);
                                     currentState = 3;
                                 }
                             }
@@ -298,7 +305,8 @@ namespace ZXing.Multi.QrCode.Internal
                             }
                         }
                         else
-                        { // Counting white pixels
+                        {
+                            // Counting white pixels
                             stateCount[currentState]++;
                         }
                     }

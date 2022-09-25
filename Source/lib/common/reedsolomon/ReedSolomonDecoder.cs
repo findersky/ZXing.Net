@@ -41,6 +41,10 @@ namespace ZXing.Common.ReedSolomon
     {
         private readonly GenericGF field;
 
+        /// <summary>
+        /// constructor
+        /// </summary>
+        /// <param name="field"></param>
         public ReedSolomonDecoder(GenericGF field)
         {
             this.field = field;
@@ -115,7 +119,7 @@ namespace ZXing.Common.ReedSolomon
             GenericGFPoly t = field.One;
 
             // Run Euclidean algorithm until r's degree is less than R/2
-            while (r.Degree >= R / 2)
+            while (2 * r.Degree >= R)
             {
                 GenericGFPoly rLastLast = rLast;
                 GenericGFPoly tLastLast = tLast;
@@ -145,7 +149,7 @@ namespace ZXing.Common.ReedSolomon
 
                 if (r.Degree >= rLast.Degree)
                 {
-                    // throw new IllegalStateException("Division algorithm failed to reduce polynomial?");
+                    // throw new IllegalStateException("Division algorithm failed to reduce polynomial? " + "r: " + r + ", rLast: " + rLast);
                     return null;
                 }
             }

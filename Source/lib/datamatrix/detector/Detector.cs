@@ -79,7 +79,7 @@ namespace ZXing.Datamatrix.Internal
                 dimensionRight += 1;
             }
 
-            if (4 * dimensionTop < 7 * dimensionRight && 4 * dimensionRight < 7 * dimensionTop)
+            if (4 * dimensionTop < 6 * dimensionRight && 4 * dimensionRight < 6 * dimensionTop)
             {
                 // The matrix is square
                 dimensionTop = dimensionRight = Math.Max(dimensionTop, dimensionRight);
@@ -96,14 +96,14 @@ namespace ZXing.Datamatrix.Internal
             return new DetectorResult(bits, new ResultPoint[] { topLeft, bottomLeft, bottomRight, topRight });
         }
 
-        private ResultPoint shiftPoint(ResultPoint point, ResultPoint to, int div)
+        private static ResultPoint shiftPoint(ResultPoint point, ResultPoint to, int div)
         {
             float x = (to.X - point.X) / (div + 1);
             float y = (to.Y - point.Y) / (div + 1);
             return new ResultPoint(point.X + x, point.Y + y);
         }
 
-        private ResultPoint moveAway(ResultPoint point, float fromX, float fromY)
+        private static ResultPoint moveAway(ResultPoint point, float fromX, float fromY)
         {
             float x = point.X;
             float y = point.Y;
@@ -392,7 +392,8 @@ namespace ZXing.Datamatrix.Internal
             int fromX = (int)from.X;
             int fromY = (int)from.Y;
             int toX = (int)to.X;
-            int toY = (int)to.Y;
+            int toY = Math.Min(image.Height - 1, (int)to.Y);
+
             bool steep = Math.Abs(toY - fromY) > Math.Abs(toX - fromX);
             if (steep)
             {

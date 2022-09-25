@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
-
-using ZXing;
-
 namespace WindowsFormsDemo
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Windows.Forms;
+
+    using ZXing;
+
     public partial class DecodingOptionsForm : Form
     {
         private readonly BarcodeReader reader;
@@ -33,12 +33,17 @@ namespace WindowsFormsDemo
         {
             get { return chkMultipleDecodeOnlyQR.Checked; }
         }
+        public bool UseGlobalHistogramBinarizer
+        {
+            get { return chkUseGlobalHistogramBinarizer.Checked; }
+        }
 
         public DecodingOptionsForm(BarcodeReader reader, bool multipleBarcodes, bool multipleBarcodesOnlyQR)
         {
             this.reader = reader;
             InitializeComponent();
 
+            propOptions.SelectedObject = reader.Options;
             chkMultipleDecode.Checked = multipleBarcodes;
             chkMultipleDecodeOnlyQR.Checked = multipleBarcodesOnlyQR;
 
@@ -61,26 +66,12 @@ namespace WindowsFormsDemo
         {
             base.OnLoad(e);
 
-            chkTryInverted.Checked = reader.TryInverted;
-            chkTryHarder.Checked = reader.Options.TryHarder;
             chkAutoRotate.Checked = reader.AutoRotate;
-            chkPureBarcode.Checked = reader.Options.PureBarcode;
-
-            chkCode39CheckDigit.Checked = reader.Options.AssumeCode39CheckDigit;
-            chkCode39ExtendedMode.Checked = reader.Options.UseCode39ExtendedMode;
-            chkCode39ExtendedModeRelaxed.Checked = reader.Options.UseCode39RelaxedExtendedMode;
         }
 
         private void btnOk_Click(object sender, EventArgs e)
         {
-            reader.TryInverted = chkTryInverted.Checked;
-            reader.Options.TryHarder = chkTryHarder.Checked;
             reader.AutoRotate = chkAutoRotate.Checked;
-            reader.Options.PureBarcode = chkPureBarcode.Checked;
-
-            reader.Options.AssumeCode39CheckDigit = chkCode39CheckDigit.Checked;
-            reader.Options.UseCode39ExtendedMode = chkCode39ExtendedMode.Checked;
-            reader.Options.UseCode39RelaxedExtendedMode = chkCode39ExtendedModeRelaxed.Checked;
 
             reader.Options.PossibleFormats = new List<BarcodeFormat>();
 

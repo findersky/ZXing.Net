@@ -24,8 +24,29 @@ namespace ZXing.ImageSharp.Rendering
     /// <summary>
     /// IBarcodeRenderer implementation which creates an ImageSharp Image object from the barcode BitMatrix
     /// </summary>
-    public class ImageSharpRenderer<TPixel> : ZXing.Rendering.IBarcodeRenderer<Image<TPixel>> where TPixel : struct, IPixel<TPixel>
+    public class ImageSharpRenderer<TPixel> : ZXing.Rendering.IBarcodeRenderer<Image<TPixel>> where TPixel : unmanaged, IPixel<TPixel>
     {
+        /// <summary>
+        /// Gets or sets the foreground color.
+        /// </summary>
+        /// <value>The foreground color.</value>
+        public Color Foreground { get; set; }
+
+        /// <summary>
+        /// Gets or sets the background color.
+        /// </summary>
+        /// <value>The background color.</value>
+        public Color Background { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageSharpRenderer{TPixel}"/> class.
+        /// </summary>
+        public ImageSharpRenderer()
+        {
+            Foreground = Color.Black;
+            Background = Color.White;
+        }
+
         /// <summary>
         /// renders the image
         /// </summary>
@@ -50,8 +71,8 @@ namespace ZXing.ImageSharp.Rendering
         {
             var width = matrix.Width;
             var height = matrix.Height;
-            var black = new Rgba32(0xFF000000);
-            var white = new Rgba32(0xFFFFFFFF);
+            var foreColor = Foreground;
+            var backColor = Background;
 
             var pixelsize = 1;
 
@@ -73,7 +94,7 @@ namespace ZXing.ImageSharp.Rendering
                 }
             }
 
-            var result = new Image<TPixel>(matrix.Width, matrix.Height);
+            var result = new Image<TPixel>(width, height);
             for (int y = 0; y < matrix.Height; y++)
             {
                 for (var pixelsizeHeight = 0; pixelsizeHeight < pixelsize; pixelsizeHeight++)
@@ -82,7 +103,7 @@ namespace ZXing.ImageSharp.Rendering
 
                     for (var x = 0; x < matrix.Width; x++)
                     {
-                        var color = matrix[x, y] ? black : white;
+                        var color = matrix[x, y] ? foreColor : backColor;
                         for (var pixelsizeWidth = 0; pixelsizeWidth < pixelsize; pixelsizeWidth++)
                         {
                             var pixel = new TPixel();
@@ -93,7 +114,7 @@ namespace ZXing.ImageSharp.Rendering
                     for (var x = pixelsize * matrix.Width; x < width; x++)
                     {
                         var pixel = new TPixel();
-                        pixel.FromRgba32(white);
+                        pixel.FromRgba32(backColor);
                         result[x, rowOffset] = pixel;
                     }
                 }

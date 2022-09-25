@@ -187,6 +187,10 @@ namespace ZXing.Datamatrix.Internal
                 column += numColumns;
                 row += 4 - ((numColumns + 4) & 0x07);
             }
+            if (row >= numRows)
+            {
+                row -= numRows;
+            }
             readMappingMatrix[column, row] = true;
             return mappingBitMatrix[column, row];
         }

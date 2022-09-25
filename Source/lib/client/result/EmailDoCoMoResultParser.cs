@@ -28,7 +28,7 @@ namespace ZXing.Client.Result
     internal sealed class EmailDoCoMoResultParser : AbstractDoCoMoResultParser
     {
         private static readonly Regex ATEXT_ALPHANUMERIC = new Regex(@"\A(?:" + "[a-zA-Z0-9@.!#$%&'*+\\-/=?^_`{|}~]+" + @")\z"
-#if !(SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE || PORTABLE || UNITY || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2)
+#if !(NETFX_CORE || PORTABLE || UNITY || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2)
                                                                    , RegexOptions.Compiled);
 #else
 );
@@ -42,7 +42,7 @@ namespace ZXing.Client.Result
                 return null;
             }
 
-            var tos = matchDoCoMoPrefixedField("TO:", rawText, true);
+            var tos = matchDoCoMoPrefixedField("TO:", rawText);
             if (tos == null)
             {
                 return null;

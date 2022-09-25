@@ -62,6 +62,11 @@ namespace ZXing.Interop.Decoding
         /// </summary>
         public int NumBits { get; private set; }
 
+        /// <summary>
+        /// error message if something was wrong
+        /// </summary>
+        public String Error { get; private set; }
+
         internal Result(ZXing.Result result)
         {
             if (result != null)
@@ -76,13 +81,23 @@ namespace ZXing.Interop.Decoding
                     var index = 0;
                     foreach (var item in result.ResultMetadata)
                     {
-                        ResultMetadata[index] = new ResultMetadataItem { Key = item.Key.ToInterop(), Value = item.Value != null ? item.Value.ToString() : null };
+                        ResultMetadata[index] = new ResultMetadataItem
+                        {
+                            Key = item.Key.ToInterop(),
+                            Value = item.Value != null ? item.Value.ToString() : null
+                        };
                         index++;
                     }
                 }
                 Timestamp = result.Timestamp;
                 NumBits = result.NumBits;
             }
+        }
+
+        internal Result(Exception exc)
+        {
+            BarcodeFormat = Common.BarcodeFormat.Error;
+            Error = exc == null ? "unspecified error" : exc.ToString();
         }
 
         /// <summary>
@@ -93,6 +108,10 @@ namespace ZXing.Interop.Decoding
         /// </returns>
         public override String ToString()
         {
+            if (!string.IsNullOrEmpty(Error))
+            {
+                return Error;
+            }
             if (Text == null)
             {
                 return "[" + RawBytes.Length + " bytes]";
@@ -198,7 +217,13 @@ namespace ZXing.Interop.Decoding
         /// <summary>
         /// Aztec-specific metadata
         /// </summary>
-        AZTEC_EXTRA_METADATA
+        AZTEC_EXTRA_METADATA,
+
+        /// <summary>
+        /// Barcode Symbology Identifier.
+        /// Note: According to the GS1 specification the identifier may have to replace a leading FNC1/GS character when prepending to the barcode content.
+        /// </summary>
+        SYMBOLOGY_IDENTIFIER
     }
 
     internal static class ResultMetadataTypeExtensions
@@ -207,6 +232,8 @@ namespace ZXing.Interop.Decoding
         {
             switch (metadataType)
             {
+                case ZXing.ResultMetadataType.SYMBOLOGY_IDENTIFIER:
+                    return ResultMetadataType.SYMBOLOGY_IDENTIFIER;
                 case ZXing.ResultMetadataType.AZTEC_EXTRA_METADATA:
                     return ResultMetadataType.AZTEC_EXTRA_METADATA;
                 case ZXing.ResultMetadataType.BYTE_SEGMENTS:

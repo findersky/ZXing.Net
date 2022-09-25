@@ -33,8 +33,9 @@ namespace ZXing.QrCode
         /// Type depends on the encoder. For example for QR codes it's type
         /// <see cref="ErrorCorrectionLevel"/>.
         /// </summary>
-#if !NETSTANDARD && !NETFX_CORE && !WindowsCE && !SILVERLIGHT && !PORTABLE && !UNITY
-      [TypeConverter(typeof(ErrorLevelConverter))]
+#if !NETSTANDARD && !NETFX_CORE && !PORTABLE && !UNITY
+        [TypeConverter(typeof(ErrorLevelConverter))]
+        [CategoryAttribute("Standard"), DescriptionAttribute("Specifies what degree of error correction to use.")]
 #endif
         public ErrorCorrectionLevel ErrorCorrection
         {
@@ -63,6 +64,10 @@ namespace ZXing.QrCode
         /// <summary>
         /// Specifies what character encoding to use where applicable (type <see cref="String"/>)
         /// </summary>
+#if !NETSTANDARD && !NETFX_CORE && !PORTABLE && !UNITY
+        [CategoryAttribute("Standard"), DescriptionAttribute("Specifies what character encoding to " +
+            "use where applicable.")]
+#endif
         public string CharacterSet
         {
             get
@@ -95,6 +100,10 @@ namespace ZXing.QrCode
         /// If you set the property to true you can use UTF-8 encoding
         /// and the ECI segment is omitted.
         /// </summary>
+#if !NETSTANDARD && !NETFX_CORE && !PORTABLE && !UNITY
+        [CategoryAttribute("Standard"), DescriptionAttribute("Explicitly disables ECI segment when generating QR Code." +
+            "That is against the specification but some readers have problems otherwise when switching charset to UTF-8.")]
+#endif
         public bool DisableECI
         {
             get
@@ -115,6 +124,11 @@ namespace ZXing.QrCode
         /// Specifies the exact version of QR code to be encoded. An integer, range 1 to 40. If the data specified
         /// cannot fit within the required version, a WriterException will be thrown.
         /// </summary>
+#if !NETSTANDARD && !NETFX_CORE && !PORTABLE && !UNITY
+        [CategoryAttribute("Standard"), DescriptionAttribute("Specifies the exact version of QR code to be encoded. " +
+            "An integer, range 1 to 40. If the data specified cannot fit within the required version, " +
+            "a WriterException will be thrown.")]
+#endif
         public int? QrVersion
         {
             get
@@ -138,10 +152,38 @@ namespace ZXing.QrCode
                 }
             }
         }
+
+
+        /// <summary>
+        /// Specifies whether to use compact mode for QR code (type <see cref="System.Boolean" />, or "true" or "false"
+        /// Please note that when compaction is performed, the most compact character encoding is chosen
+        /// for characters in the input that are not in the ISO-8859-1 character set. Based on experience,
+        /// some scanners do not support encodings like cp-1256 (Arabic). In such cases the encoding can
+        /// be forced to UTF-8 by means of the <see cref="CharacterSet"/> encoding hint.
+        /// </summary>
+#if !NETSTANDARD && !NETFX_CORE && !PORTABLE && !UNITY
+        [CategoryAttribute("Standard"), DescriptionAttribute("Specifies whether to use compact mode for QR code" +
+            "When compaction is performed the value for CharacterSet is ignored.")]
+#endif
+        public bool QrCompact
+        {
+            get
+            {
+                if (Hints.ContainsKey(EncodeHintType.QR_COMPACT))
+                {
+                    return (bool)Hints[EncodeHintType.QR_COMPACT];
+                }
+                return false;
+            }
+            set
+            {
+                Hints[EncodeHintType.QR_COMPACT] = value;
+            }
+        }
     }
 
-#if !NETSTANDARD && !NETFX_CORE && !WindowsCE && !SILVERLIGHT && !PORTABLE && !UNITY
-   internal class ErrorLevelConverter : TypeConverter
+#if !NETSTANDARD && !NETFX_CORE && !PORTABLE && !UNITY
+    internal class ErrorLevelConverter : TypeConverter
    {
       public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
       {

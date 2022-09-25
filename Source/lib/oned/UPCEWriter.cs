@@ -32,20 +32,21 @@ namespace ZXing.OneD
                                        (7 * 6) + // bars
                                        6; // end guard
 
-        public override BitMatrix encode(String contents,
-           BarcodeFormat format,
-           int width,
-           int height,
-           IDictionary<EncodeHintType, object> hints)
-        {
-            if (format != BarcodeFormat.UPC_E)
-            {
-                throw new ArgumentException("Can only encode UPC_E, but got " + format);
-            }
+        private static readonly IList<BarcodeFormat> supportedWriteFormats = new List<BarcodeFormat> { BarcodeFormat.UPC_E };
 
-            return base.encode(contents, format, width, height, hints);
+        /// <summary>
+        /// returns supported formats
+        /// </summary>
+        protected override IList<BarcodeFormat> SupportedWriteFormats
+        {
+            get { return supportedWriteFormats; }
         }
 
+        /// <summary>
+        /// content encoding method
+        /// </summary>
+        /// <param name="contents"></param>
+        /// <returns></returns>
         public override bool[] encode(String contents)
         {
             int length = contents.Length;
@@ -88,9 +89,8 @@ namespace ZXing.OneD
             var checkDigit = int.Parse(contents.Substring(7, 1));
             var parities = UPCEReader.NUMSYS_AND_CHECK_DIGIT_PATTERNS[firstDigit][checkDigit];
             var result = new bool[CODE_WIDTH];
-            var pos = 0;
 
-            pos += appendPattern(result, pos, UPCEANReader.START_END_PATTERN, true);
+            var pos = appendPattern(result, 0, UPCEANReader.START_END_PATTERN, true);
 
             for (var i = 1; i <= 6; i++)
             {

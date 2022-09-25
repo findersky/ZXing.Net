@@ -55,7 +55,7 @@ namespace ZXing.Client.Result
             new VINResultParser(),
          };
 
-#if SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE || PORTABLE || UNITY || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2
+#if NETFX_CORE || PORTABLE || UNITY || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2
         private static readonly Regex DIGITS = new Regex(@"\A(?:" + "\\d+" + @")\z");
         private static readonly Regex AMPERSAND = new Regex("&");
         private static readonly Regex EQUALS = new Regex("=");
@@ -92,6 +92,11 @@ namespace ZXing.Client.Result
             return new TextParsedResult(theResult.Text, null);
         }
 
+        /// <summary>
+        /// append value to result, if not null
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="result"></param>
         protected static void maybeAppend(String value, System.Text.StringBuilder result)
         {
             if (value != null)
@@ -100,7 +105,11 @@ namespace ZXing.Client.Result
                 result.Append(value);
             }
         }
-
+        /// <summary>
+        /// append value to result, if not null
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="result"></param>
         protected static void maybeAppend(String[] value, System.Text.StringBuilder result)
         {
             if (value != null)
@@ -112,12 +121,20 @@ namespace ZXing.Client.Result
                 }
             }
         }
-
+        /// <summary>
+        /// wrap, if not null
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         protected static String[] maybeWrap(String value)
         {
             return value == null ? null : new[] { value };
         }
-
+        /// <summary>
+        /// unescape backslash
+        /// </summary>
+        /// <param name="escaped"></param>
+        /// <returns></returns>
         protected static String unescapeBackslash(String escaped)
         {
             if (escaped != null)
@@ -147,7 +164,11 @@ namespace ZXing.Client.Result
             }
             return escaped;
         }
-
+        /// <summary>
+        /// parse hex digit
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
         protected static int parseHexDigit(char c)
         {
             if (c >= 'a')
@@ -304,7 +325,11 @@ namespace ZXing.Client.Result
             String[] matches = matchPrefixedField(prefix, rawText, endChar, trim);
             return matches == null ? null : matches[0];
         }
-
+        /// <summary>
+        /// decodes url
+        /// </summary>
+        /// <param name="escaped"></param>
+        /// <returns></returns>
         protected static String urlDecode(String escaped)
         {
             // Should we better use HttpUtility.UrlDecode?

@@ -24,6 +24,7 @@ namespace ZXing.Interop.Encoding
     public class PDF417EncodingOptions : EncodingOptions
     {
         internal readonly PDF417.PDF417EncodingOptions wrappedPDF417EncodingOptions;
+        internal Dimensions dimensions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PDF417EncodingOptions"/> class.
@@ -37,6 +38,10 @@ namespace ZXing.Interop.Encoding
            : base(other)
         {
             wrappedPDF417EncodingOptions = other;
+            if (other.Dimensions != null)
+            {
+                dimensions = other.Dimensions.ToInterop(this);
+            }
         }
 
         /// <summary>
@@ -64,8 +69,23 @@ namespace ZXing.Interop.Encoding
         /// </summary>
         public Dimensions Dimensions
         {
-            get { return wrappedPDF417EncodingOptions.Dimensions.ToInterop(); }
-            set { wrappedPDF417EncodingOptions.Dimensions = value.ToZXing(); }
+            get
+            {
+                if (dimensions == null)
+                {
+                    if (wrappedPDF417EncodingOptions.Dimensions == null)
+                    {
+                        wrappedPDF417EncodingOptions.Dimensions = new PDF417.Internal.Dimensions(2, 30, 3, 90);
+                        dimensions = wrappedPDF417EncodingOptions.Dimensions.ToInterop(this);
+                    }
+                }
+                return dimensions;
+            }
+            set
+            {
+                dimensions = value;
+                wrappedPDF417EncodingOptions.Dimensions = dimensions.ToZXing();
+            }
         }
 
         /// <summary>
@@ -75,6 +95,26 @@ namespace ZXing.Interop.Encoding
         {
             get { return wrappedPDF417EncodingOptions.ErrorCorrection.ToInterop(); }
             set { wrappedPDF417EncodingOptions.ErrorCorrection = value.ToZXing(); }
+        }
+
+        /// <summary>
+        /// Specifies the aspect ratio of the smallest codeword.
+        /// (Width of narrowest bar / Row Height)
+        /// </summary>
+        public PDF417AspectRatio AspectRatio
+        {
+            get { return wrappedPDF417EncodingOptions.AspectRatio.ToInterop(); }
+            set { wrappedPDF417EncodingOptions.AspectRatio = value.ToZXing(); }
+        }
+
+        /// <summary>
+        /// Specifies the desired output image aspect ratio (Width / Height).
+        /// The actual aspect ratio is calculated based on the necessary number of codewords.
+        /// </summary>
+        public float ImageAspectRatio
+        {
+            get { return wrappedPDF417EncodingOptions.ImageAspectRatio; }
+            set { wrappedPDF417EncodingOptions.ImageAspectRatio = value; }
         }
 
         /// <summary>
@@ -165,25 +205,75 @@ namespace ZXing.Interop.Encoding
     [ClassInterface(ClassInterfaceType.AutoDual)]
     public sealed class Dimensions
     {
+        private PDF417EncodingOptions encodingOptions;
+        private int minCols;
+        private int maxCols;
+        private int minRows;
+        private int maxRows;
+
         /// <summary>
         /// Gets the min cols.
         /// </summary>
-        public int MinCols { get; private set; }
+        public int MinCols
+        {
+            get => minCols;
+            set
+            {
+                minCols = value;
+                if (encodingOptions != null)
+                {
+                    encodingOptions.Dimensions = this;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the max cols.
         /// </summary>
-        public int MaxCols { get; private set; }
+        public int MaxCols
+        {
+            get => maxCols;
+            set
+            {
+                maxCols = value;
+                if (encodingOptions != null)
+                {
+                    encodingOptions.Dimensions = this;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the min rows.
         /// </summary>
-        public int MinRows { get; private set; }
+        public int MinRows
+        {
+            get => minRows;
+            set
+            {
+                minRows = value;
+                if (encodingOptions != null)
+                {
+                    encodingOptions.Dimensions = this;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the max rows.
         /// </summary>
-        public int MaxRows { get; private set; }
+        public int MaxRows
+        {
+            get => maxRows;
+            set
+            {
+                maxRows = value;
+                if (encodingOptions != null)
+                {
+                    encodingOptions.Dimensions = this;
+                }
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Dimensions"/> class.
@@ -199,15 +289,21 @@ namespace ZXing.Interop.Encoding
             MinRows = minRows;
             MaxRows = maxRows;
         }
+
+        internal Dimensions(int minCols, int maxCols, int minRows, int maxRows, PDF417EncodingOptions encodingOptions)
+            : this(minCols, maxCols, minRows, maxRows)
+        {
+            this.encodingOptions = encodingOptions ?? throw new System.ArgumentNullException(nameof(encodingOptions));
+        }
     }
 
     internal static class DimensionsExtensions
     {
-        public static Dimensions ToInterop(this PDF417.Internal.Dimensions other)
+        public static Dimensions ToInterop(this PDF417.Internal.Dimensions other, PDF417EncodingOptions encodingOptions)
         {
             if (other == null)
                 return null;
-            return new Dimensions(other.MinCols, other.MaxCols, other.MinRows, other.MaxRows);
+            return new Dimensions(other.MinCols, other.MaxCols, other.MinRows, other.MaxRows, encodingOptions);
         }
         public static PDF417.Internal.Dimensions ToZXing(this Dimensions other)
         {
@@ -282,6 +378,71 @@ namespace ZXing.Interop.Encoding
                 case PDF417ErrorCorrectionLevel.L0:
                 default:
                     return PDF417.Internal.PDF417ErrorCorrectionLevel.L0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// defines the aspect ratio of the image
+    /// </summary>
+    [ComVisible(true)]
+    [Guid("0D9D4E12-681F-4199-9C1C-D04889C5C2BA")]
+    public enum PDF417AspectRatio
+    {
+        /// <summary>
+        /// ratio 1
+        /// </summary>
+        A1 = 1,
+        /// <summary>
+        /// ratio 2
+        /// </summary>
+        A2,
+        /// <summary>
+        /// ratio 3
+        /// </summary>
+        A3,
+        /// <summary>
+        /// ratio 4
+        /// </summary>
+        A4,
+        /// <summary>
+        /// automatic selection
+        /// </summary>
+        AUTO
+    }
+
+    internal static class PDF417AspectRatioExtensions
+    {
+        public static PDF417AspectRatio ToInterop(this PDF417.Internal.PDF417AspectRatio other)
+        {
+            switch (other)
+            {
+                case PDF417.Internal.PDF417AspectRatio.A1:
+                    return PDF417AspectRatio.A1;
+                case PDF417.Internal.PDF417AspectRatio.A2:
+                    return PDF417AspectRatio.A2;
+                case PDF417.Internal.PDF417AspectRatio.A3:
+                    return PDF417AspectRatio.A3;
+                case PDF417.Internal.PDF417AspectRatio.A4:
+                    return PDF417AspectRatio.A4;
+                default:
+                    return PDF417AspectRatio.AUTO;
+            }
+        }
+        public static PDF417.Internal.PDF417AspectRatio ToZXing(this PDF417AspectRatio other)
+        {
+            switch (other)
+            {
+                case PDF417AspectRatio.A1:
+                    return PDF417.Internal.PDF417AspectRatio.A1;
+                case PDF417AspectRatio.A2:
+                    return PDF417.Internal.PDF417AspectRatio.A2;
+                case PDF417AspectRatio.A3:
+                    return PDF417.Internal.PDF417AspectRatio.A3;
+                case PDF417AspectRatio.A4:
+                    return PDF417.Internal.PDF417AspectRatio.A4;
+                default:
+                    return PDF417.Internal.PDF417AspectRatio.AUTO;
             }
         }
     }

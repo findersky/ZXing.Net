@@ -29,7 +29,7 @@ namespace ZXing.Client.Result
     /// <author>Sean Owen</author>
     sealed class VCardResultParser : ResultParser
     {
-#if SILVERLIGHT4 || SILVERLIGHT5 || NETFX_CORE || PORTABLE || UNITY || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2
+#if NETFX_CORE || PORTABLE || UNITY || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_2
         private static readonly Regex BEGIN_VCARD = new Regex("BEGIN:VCARD", RegexOptions.IgnoreCase);
         private static readonly Regex VCARD_LIKE_DATE = new Regex(@"\A(?:" + "\\d{4}-?\\d{2}-?\\d{2}" + @")\z");
         private static readonly Regex CR_LF_SPACE_TAB = new Regex("\r\n[ \t]");
@@ -329,11 +329,7 @@ namespace ZXing.Client.Result
                 String fragment;
                 if (charset == null)
                 {
-#if WindowsCE
-               fragment = Encoding.Default.GetString(fragmentBytes, 0, fragmentBytes.Length);
-#else
                     fragment = Encoding.UTF8.GetString(fragmentBytes, 0, fragmentBytes.Length);
-#endif
                 }
                 else
                 {
@@ -343,21 +339,7 @@ namespace ZXing.Client.Result
                     }
                     catch (Exception)
                     {
-#if WindowsCE
-                  // WindowsCE doesn't support all encodings. But it is device depended.
-                  // So we try here the some different ones
-                  if (charset == "ISO-8859-1")
-                  {
-                     fragment = Encoding.GetEncoding(1252).GetString(fragmentBytes, 0, fragmentBytes.Length);
-                  }
-                  else
-                  {
-                     fragment = Encoding.Default.GetString(fragmentBytes, 0, fragmentBytes.Length);
-                  }
-                  fragment = Encoding.Default.GetString(fragmentBytes, 0, fragmentBytes.Length);
-#else
                         fragment = Encoding.UTF8.GetString(fragmentBytes, 0, fragmentBytes.Length);
-#endif
                     }
                 }
                 fragmentBuffer.Seek(0, SeekOrigin.Begin);

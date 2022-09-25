@@ -81,9 +81,6 @@
     <Compile Include="..\..\lib\common\BigInteger\Sign.cs">
       <Link>common\BigInteger\Sign.cs</Link>
     </Compile>
-    <Compile Include="..\..\lib\silverlight\BigInteger.cs">
-      <Link>BigInteger.cs</Link>
-    </Compile>
     <Compile Include="aztec\AztecBlackBox1TestCase.cs" />
     <Compile Include="aztec\AztecBlackBox2TestCase.cs" />
     <Compile Include="aztec\decoder\DecoderTest.cs" />
@@ -123,6 +120,7 @@
     </Compile>
     <Compile Include="datamatrix\DataMatrixBlackBox1TestCase.cs" />
     <Compile Include="datamatrix\DataMatrixBlackBox2TestCase.cs" />
+    <Compile Include="datamatrix\DataMatrixBlackBox3TestCase.cs" />
     <Compile Include="datamatrix\DataMatrixBlackBoxZTestCase.cs" />
     <Compile Include="datamatrix\DataMatrixWriterTestCase.cs" />
     <Compile Include="datamatrix\decoder\DecodedBitStreamParserTestCase.cs" />
@@ -131,6 +129,8 @@
     <Compile Include="datamatrix\encoder\HighLevelEncodeTestCase.cs" />
     <Compile Include="datamatrix\encoder\PlacementTestCase.cs" />
     <Compile Include="datamatrix\encoder\SymbolInfoTestCase.cs" />
+    <Compile Include="inverted\InvertedDataMatrixBlackBoxTestCase.cs" />
+    <Compile Include="inverted\NoHintInvertedDataMatrixBlackBoxTestCase.cs" />
     <Compile Include="maxicode\Maxicode1TestCase.cs" />
     <Compile Include="multi\GenericMultipleBarcodeReaderTestCase.cs" />
     <Compile Include="multi\MultiTestCase.cs" />
@@ -211,6 +211,7 @@
     <Compile Include="pdf417\PDF417BlackBox4TestCase.cs" />
     <Compile Include="pdf417\PDF417BlackBoxZTestCase.cs" />
     <Compile Include="pdf417\PDF417DecodedBitStreamParserTestCase.cs" />
+    <Compile Include="pdf417\PDF417MacroTestCase.cs" />
     <Compile Include="pdf417\PDF417WriterTestCase.cs" />
     <Compile Include="PlanarYUVLuminanceSourceTestCase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

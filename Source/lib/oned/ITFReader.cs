@@ -40,7 +40,7 @@ namespace ZXing.OneD
     public sealed class ITFReader : OneDReader
     {
         private static readonly int MAX_AVG_VARIANCE = (int)(PATTERN_MATCH_RESULT_SCALE_FACTOR * 0.38f);
-        private static readonly int MAX_INDIVIDUAL_VARIANCE = (int)(PATTERN_MATCH_RESULT_SCALE_FACTOR * 0.5f);
+        private static readonly int MAX_INDIVIDUAL_VARIANCE = (int)(PATTERN_MATCH_RESULT_SCALE_FACTOR * 0.57f);
 
         private const int W = 3; // Pixel width of a wide line
         private const int w = 2; // Pixel width of a wide line
@@ -173,15 +173,17 @@ namespace ZXing.OneD
                 resultPointCallback(new ResultPoint(endRange[0], rowNumber));
             }
 
-            return new Result(
-               resultString,
-               null, // no natural byte representation for these barcodes
-               new ResultPoint[]
-                  {
-                  new ResultPoint(startRange[1], rowNumber),
-                  new ResultPoint(endRange[0], rowNumber)
-                  },
-               BarcodeFormat.ITF);
+            var resultObject = new Result(
+                resultString,
+                null, // no natural byte representation for these barcodes
+                new ResultPoint[]
+                    {
+                    new ResultPoint(startRange[1], rowNumber),
+                    new ResultPoint(endRange[0], rowNumber)
+                    },
+                BarcodeFormat.ITF);
+            resultObject.putMetadata(ResultMetadataType.SYMBOLOGY_IDENTIFIER, "]I0");
+            return resultObject;
         }
 
         /// <summary>

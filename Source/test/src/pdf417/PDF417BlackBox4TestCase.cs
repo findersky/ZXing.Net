@@ -16,11 +16,7 @@
 
 using System;
 using System.Collections.Generic;
-#if !SILVERLIGHT
 using System.Drawing;
-#else
-using System.Windows.Media.Imaging;
-#endif
 using System.IO;
 using System.Text;
 
@@ -37,24 +33,19 @@ namespace ZXing.PDF417.Test
    /// @author Guenther Grau
    /// </summary>
    [TestFixture]
-   public sealed class PDF417BlackBox4TestCase : AbstractBlackBoxTestCase
+   public sealed class PDF417BlackBox4TestCase : AbstractBlackBoxBaseTestCase
    {
-#if !SILVERLIGHT
       private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-#else
-      private static readonly DanielVaughan.Logging.ILog log = DanielVaughan.Logging.LogManager.GetLog(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-#endif
 
       private static readonly Encoding UTF8 = Encoding.UTF8;
       private static readonly Encoding ISO88591 = Encoding.GetEncoding("ISO8859-1");
       private const String TEST_BASE_PATH_SUFFIX = "test/data/blackbox/pdf417-4";
-      private readonly PDF417Reader barcodeReader = new PDF417Reader();
 
       private readonly List<TestResult> testResults = new List<TestResult>();
       private String testBase;
 
       public PDF417BlackBox4TestCase()
-         : base(TEST_BASE_PATH_SUFFIX, null, BarcodeFormat.PDF_417)
+         : base(TEST_BASE_PATH_SUFFIX, new PDF417Reader(), BarcodeFormat.PDF_417)
       {
          // A little workaround to prevent aggravation in my IDE
          if (!Directory.Exists(TEST_BASE_PATH_SUFFIX))
@@ -70,12 +61,7 @@ namespace ZXing.PDF417.Test
       }
 
       [Test]
-      public override void testBlackBox()
-      {
-         testPDF417BlackBoxCountingResults(true);
-      }
-
-      private void testPDF417BlackBoxCountingResults(bool assertOnFailure)
+      public void testBlackBox()
       {
          Assert.IsFalse(testResults.Count == 0);
 
@@ -108,12 +94,7 @@ namespace ZXing.PDF417.Test
                List<Result> results = new List<Result>();
                foreach (var imageFile in testImageGroup.Value)
                {
-#if !SILVERLIGHT
                   var image = new Bitmap(Image.FromFile(imageFile));
-#else
-                  var image = new WriteableBitmap(0, 0);
-                  image.SetSource(File.OpenRead(imageFile));
-#endif
                   var rotation = testResults[x].Rotation;
                   var rotatedImage = rotateImage(image, rotation);
                   var source = new BitmapLuminanceSource(rotatedImage);
@@ -184,15 +165,12 @@ namespace ZXing.PDF417.Test
          }
 
          // Then run through again and assert if any failed
-         if (assertOnFailure)
+         for (int x = 0; x < testCount; x++)
          {
-            for (int x = 0; x < testCount; x++)
-            {
-               TestResult testResult = testResults[x];
-               String label = "Rotation " + testResult.Rotation + " degrees: Too many images failed";
-               Assert.IsTrue(passedCounts[x] >= testResult.MustPassCount, label);
-               Assert.IsTrue(tryHarderCounts[x] >= testResult.TryHarderCount, "Try harder, " + label);
-            }
+            TestResult testResult = testResults[x];
+            String label = "Rotation " + testResult.Rotation + " degrees: Too many images failed";
+            Assert.IsTrue(passedCounts[x] >= testResult.MustPassCount, label);
+            Assert.IsTrue(tryHarderCounts[x] >= testResult.TryHarderCount, "Try harder, " + label);
          }
       }
 
@@ -209,7 +187,7 @@ namespace ZXing.PDF417.Test
             hints[DecodeHintType.TRY_HARDER] = true;
          }
 
-         return barcodeReader.decodeMultiple(source, hints);
+         return ((PDF417Reader)barcodeReader).decodeMultiple(source, hints);
       }
 
       private IDictionary<String, List<String>> getImageFileLists()

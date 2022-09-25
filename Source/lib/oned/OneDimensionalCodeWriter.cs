@@ -27,7 +27,31 @@ namespace ZXing.OneD
     /// </summary>
     public abstract class OneDimensionalCodeWriter : Writer
     {
-        private static System.Text.RegularExpressions.Regex NUMERIC = new System.Text.RegularExpressions.Regex("[0-9]+");
+        private static readonly System.Text.RegularExpressions.Regex NUMERIC = new System.Text.RegularExpressions.Regex("[0-9]+");
+
+        /// <summary>
+        /// returns supported formats
+        /// </summary>
+        protected abstract IList<BarcodeFormat> SupportedWriteFormats { get; }
+
+        /// <summary>
+        /// Encode the contents to boolean array expression of one-dimensional barcode.
+        /// Start code and end code should be included in result, and side margins should not be included.
+        /// </summary>
+        /// <param name="contents">barcode contents to encode</param>
+        /// <returns>a <c>bool[]</c> of horizontal pixels (false = white, true = black)</returns>
+        public abstract bool[] encode(String contents);
+
+        /// <summary>
+        /// Can be overwritten if the encode requires to read the hints map. Otherwise it defaults to {@code encode}.
+        /// </summary>
+        /// <param name="contents">barcode contents to encode</param>
+        /// <param name="hints">encoding hints</param>
+        /// <returns>a <c>bool[]</c> of horizontal pixels (false = white, true = black)</returns>
+        protected virtual bool[] encode(String contents, IDictionary<EncodeHintType, object> hints)
+        {
+            return encode(contents);
+        }
 
         /// <summary>
         /// Encode a barcode using the default settings.
@@ -52,10 +76,10 @@ namespace ZXing.OneD
         /// or {@code height}, {@code IllegalArgumentException} is thrown.
         /// </summary>
         public virtual BitMatrix encode(String contents,
-                                BarcodeFormat format,
-                                int width,
-                                int height,
-                                IDictionary<EncodeHintType, object> hints)
+            BarcodeFormat format,
+            int width,
+            int height,
+            IDictionary<EncodeHintType, object> hints)
         {
             if (String.IsNullOrEmpty(contents))
             {
@@ -66,6 +90,18 @@ namespace ZXing.OneD
             {
                 throw new ArgumentException("Negative size is not allowed. Input: "
                                             + width + 'x' + height);
+            }
+            var supportedFormats = SupportedWriteFormats;
+            if (supportedFormats != null && !supportedFormats.Contains(format))
+            {
+#if NET20 || NET35 || UNITY || PORTABLE
+                var supportedFormatsArray = new string[supportedFormats.Count];
+                for (var i = 0; i < supportedFormats.Count; i++)
+                    supportedFormatsArray[i] = supportedFormats[i].ToString();
+                throw new ArgumentException("Can only encode " + string.Join(", ", supportedFormatsArray) + ", but got " + format);
+#else
+                throw new ArgumentException("Can only encode " + string.Join(", ", supportedFormats) + ", but got " + format);
+#endif
             }
 
             int sidesMargin = DefaultMargin;
@@ -78,7 +114,7 @@ namespace ZXing.OneD
                 }
             }
 
-            var code = encode(contents);
+            var code = encode(contents, hints);
             return renderResult(code, width, height, sidesMargin);
         }
 
@@ -156,14 +192,6 @@ namespace ZXing.OneD
                 return 10;
             }
         }
-
-        /// <summary>
-        /// Encode the contents to bool array expression of one-dimensional barcode.
-        /// Start code and end code should be included in result, and side margins should not be included.
-        /// </summary>
-        /// <param name="contents">barcode contents to encode</param>
-        /// <returns>a <c>bool[]</c> of horizontal pixels (false = white, true = black)</returns>
-        public abstract bool[] encode(String contents);
 
         /// <summary>
         /// Calculates the checksum digit modulo10.

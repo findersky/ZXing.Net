@@ -33,10 +33,10 @@ namespace ZXing.Common
     /// <author>dswitkin@google.com (Daniel Switkin)</author>
     public sealed partial class BitMatrix
     {
-        private readonly int width;
-        private readonly int height;
-        private readonly int rowSize;
-        private readonly int[] bits;
+        private int width;
+        private int height;
+        private int rowSize;
+        private int[] bits;
 
         /// <returns> The width of the matrix
         /// </returns>
@@ -142,6 +142,13 @@ namespace ZXing.Common
             return bits;
         }
 
+        /// <summary>
+        /// parse the string representation to a bitmatrix
+        /// </summary>
+        /// <param name="stringRepresentation"></param>
+        /// <param name="setString"></param>
+        /// <param name="unsetString"></param>
+        /// <returns></returns>
         public static BitMatrix parse(String stringRepresentation, String setString, String unsetString)
         {
             if (stringRepresentation == null)
@@ -261,6 +268,18 @@ namespace ZXing.Common
         }
 
         /// <summary>
+        /// <p>Flips every bit in the matrix.</p>
+        /// </summary>
+        public void flip()
+        {
+            int max = bits.Length;
+            for (int i = 0; i < max; i++)
+            {
+                bits[i] = ~bits[i];
+            }
+        }
+
+        /// <summary>
         /// flip all of the bits, if shouldBeFlipped is true for the coordinates
         /// </summary>
         /// <param name="shouldBeFlipped">should return true, if the bit at a given coordinate should be flipped</param>
@@ -286,8 +305,7 @@ namespace ZXing.Common
         /// <param name="mask">The mask.</param>
         public void xor(BitMatrix mask)
         {
-            if (width != mask.Width || height != mask.Height
-                || rowSize != mask.RowSize)
+            if (width != mask.Width || height != mask.Height || rowSize != mask.RowSize)
             {
                 throw new ArgumentException("input matrix dimensions do not match");
             }
@@ -393,19 +411,47 @@ namespace ZXing.Common
         /// </summary>
         public void rotate180()
         {
-            var width = Width;
-            var height = Height;
             var topRow = new BitArray(width);
             var bottomRow = new BitArray(width);
-            for (int i = 0; i < (height + 1) / 2; i++)
+            int maxHeight = (height + 1) / 2;
+            for (int i = 0; i < maxHeight; i++)
             {
                 topRow = getRow(i, topRow);
-                bottomRow = getRow(height - 1 - i, bottomRow);
+                int bottomRowIndex = height - 1 - i;
+                bottomRow = getRow(bottomRowIndex, bottomRow);
                 topRow.reverse();
                 bottomRow.reverse();
                 setRow(i, bottomRow);
-                setRow(height - 1 - i, topRow);
+                setRow(bottomRowIndex, topRow);
             }
+        }
+
+        /// <summary>
+        /// Modifies this {@code BitMatrix} to represent the same but rotated 90 degrees counterclockwise
+        /// </summary>
+        public void rotate90()
+        {
+            int newWidth = height;
+            int newHeight = width;
+            int newRowSize = (newWidth + 31) / 32;
+            int[] newBits = new int[newRowSize * newHeight];
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int offset = y * rowSize + (x / 32);
+                    if ((((int)(((uint)bits[offset]) >> (x & 0x1f))) & 1) != 0)
+                    {
+                        int newOffset = (newHeight - 1 - x) * newRowSize + (y / 32);
+                        newBits[newOffset] |= 1 << (y & 0x1f);
+                    }
+                }
+            }
+            width = newWidth;
+            height = newHeight;
+            rowSize = newRowSize;
+            bits = newBits;
         }
 
         /// <summary>
@@ -498,6 +544,10 @@ namespace ZXing.Common
             return new[] { x, y };
         }
 
+        /// <summary>
+        /// bottom right
+        /// </summary>
+        /// <returns></returns>
         public int[] getBottomRightOnBit()
         {
             int bitsOffset = bits.Length - 1;
@@ -581,11 +631,7 @@ namespace ZXing.Common
         /// </returns>
         public override String ToString()
         {
-#if WindowsCE
-         return ToString("X ", "  ", "\r\n");
-#else
             return ToString("X ", "  ", Environment.NewLine);
-#endif
         }
 
         /// <summary>
@@ -598,11 +644,7 @@ namespace ZXing.Common
         /// </returns>
         public String ToString(String setString, String unsetString)
         {
-#if WindowsCE
-         return buildToString(setString, unsetString, "\r\n");
-#else
             return buildToString(setString, unsetString, Environment.NewLine);
-#endif
         }
 
         /// <summary>
