@@ -129,7 +129,7 @@ namespace ZXing.Aztec.Test
         }
 
         [TestCase("Espa\u00F1ol", null, 25, true, 1, false)] // Without ECI (implicit ISO-8859-1)
-        [TestCase("Espa\u00F1ol", "ISO-8859-1", 25, true, 2, false)] // Explicit ISO-8859-1
+        [TestCase("Espa\u00F1ol", "ISO-8859-1", 25, true, 1, false)] // Explicit ISO-8859-1
         [TestCase("Espa\u00F1ol", "ISO-8859-1", 25, true, 1, true)] // Explicit ISO-8859-1, disable ECI segment
         [TestCase("\u20AC 1 sample data.", "WINDOWS-1252", 25, true, 2, false)] // Standard ISO-8859-1 cannot encode Euro symbol; Windows-1252 superset can
         [TestCase("\u20AC 1 sample data.", "ISO-8859-15", 25, true, 2, false)]
@@ -459,7 +459,6 @@ namespace ZXing.Aztec.Test
 
         [TestCase(33)]
         [TestCase(-1)]
-        [ExpectedException(typeof(ArgumentException))]
         public void doTestUserSpecifiedLayers(int userSpecifiedLayers)
         {
             var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -471,11 +470,10 @@ namespace ZXing.Aztec.Test
             Assert.AreEqual(32, aztec.Layers);
             Assert.IsFalse(aztec.isCompact);
 
-            Internal.Encoder.encode(alphabet, 25, userSpecifiedLayers);
+            Assert.Throws<ArgumentException>(() => Internal.Encoder.encode(alphabet, 25, userSpecifiedLayers));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
         public void testBorderCompact4CaseFailed()
         {
             // Compact(4) con hold 608 bits of information, but at most 504 can be data.  Rest must
@@ -483,7 +481,7 @@ namespace ZXing.Aztec.Test
             String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             // encodes as 26 * 5 * 4 = 520 bits of data
             String alphabet4 = alphabet + alphabet + alphabet + alphabet;
-            Internal.Encoder.encode(alphabet4, 0, -4);
+            Assert.Throws<ArgumentException>(() => Internal.Encoder.encode(alphabet4, 0, -4));
         }
 
         [Test]

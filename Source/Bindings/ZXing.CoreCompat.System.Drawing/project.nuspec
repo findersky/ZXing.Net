@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
-    <version>0.16.7-beta</version>
+    <version>0.16.8-beta</version>
     <authors>Michael Jahn</authors>
     <owners>Michael Jahn</owners>
     <license type="expression">Apache-2.0</license>
@@ -12,17 +12,18 @@
     <title>ZXing.Net.Bindings.CoreCompat.System.Drawing</title>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>ZXing.Net Bindings for CoreCompat.System.Drawing - use CoreCompat.System.Drawing with ZXing.Net for barcode reading</description>
+    <readme>readme.md</readme>
     <summary>ZXing.Net Bindings for CoreCompat.System.Drawing</summary>
     <releaseNotes></releaseNotes>
     <tags>ZXing CoreCompat.System.Drawing</tags>
     <dependencies>
       <group targetFramework="netstandard1.3">
-        <dependency id="ZXing.Net" version="0.16.7" exclude="Build,Analyzers" />
+        <dependency id="ZXing.Net" version="0.16.9" exclude="Build,Analyzers" />
         <dependency id="CoreCompat.System.Drawing" version="1.0.0-beta006" exclude="Build,Analyzers" />
         <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="ZXing.Net" version="0.16.7" exclude="Build,Analyzers" />
+        <dependency id="ZXing.Net" version="0.16.9" exclude="Build,Analyzers" />
         <dependency id="CoreCompat.System.Drawing.v2" version="5.2.0-preview1-r131" exclude="Build,Analyzers" />
         <dependency id="NETStandard.Library" version="2.0.0" exclude="Build,Analyzers" />
       </group>
@@ -30,6 +31,7 @@
   </metadata>
   <files>
     <file src="..\..\..\Icons\logo.jpg" target="." />
+    <file src="readme.md" target="." />
     <file src="bin\Release\netstandard1.3\ZXing.CoreCompat.System.Drawing.dll" target="lib\netstandard1.3\ZXing.CoreCompat.System.Drawing.dll" />
     <file src="bin\Release\netstandard1.3\ZXing.CoreCompat.System.Drawing.pdb" target="lib\netstandard1.3\ZXing.CoreCompat.System.Drawing.pdb" />
     <file src="bin\Release\netstandard1.3\ZXing.CoreCompat.System.Drawing.xml" target="lib\netstandard1.3\ZXing.CoreCompat.System.Drawing.xml" />

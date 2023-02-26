@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-using System;
-using System.Collections.Generic;
-
-using ZXing.Common;
-using ZXing.Datamatrix.Encoder;
-using ZXing.QrCode.Internal;
-
 namespace ZXing.Datamatrix
 {
+    using System;
+    using System.Collections.Generic;
+
+    using ZXing.Common;
+    using ZXing.Datamatrix.Encoder;
+
     /// <summary>
     /// This object renders a Data Matrix code as a BitMatrix 2D array of greyscale values.
     /// </summary>
@@ -74,6 +73,10 @@ namespace ZXing.Datamatrix
             var defaultEncodation = Encodation.ASCII;
             Dimension minSize = null;
             Dimension maxSize = null;
+            var margin = 0;
+            var noPadding = false;
+            System.Text.Encoding encoding = null;
+            var disableEci = false;
             if (hints != null)
             {
                 if (hints.ContainsKey(EncodeHintType.DATA_MATRIX_SHAPE))
@@ -109,11 +112,40 @@ namespace ZXing.Datamatrix
                         defaultEncodation = Convert.ToInt32(requestedDefaultEncodation.ToString());
                     }
                 }
+                if (hints.ContainsKey(EncodeHintType.MARGIN))
+                {
+                    var marginInt = hints[EncodeHintType.MARGIN];
+                    if (marginInt != null)
+                    {
+                        margin = Convert.ToInt32(marginInt.ToString());
+                    }
+                }
+                if (hints.ContainsKey(EncodeHintType.NO_PADDING))
+                {
+                    var noPaddingObj = hints[EncodeHintType.NO_PADDING];
+                    if (noPaddingObj != null)
+                    {
+                        bool.TryParse(noPaddingObj.ToString(), out noPadding);
+                    }
+                }
+                encoding = IDictionaryExtensions.GetEncoding(hints, null);
+                disableEci = IDictionaryExtensions.IsBooleanFlagSet(hints, EncodeHintType.DISABLE_ECI, disableEci);
             }
 
-
             //1. step: Data encodation
-            String encoded = HighLevelEncoder.encodeHighLevel(contents, shape, minSize, maxSize, defaultEncodation);
+            String encoded;
+
+            if (IDictionaryExtensions.IsBooleanFlagSet(hints, EncodeHintType.DATA_MATRIX_COMPACT))
+            {
+                var hasGS1FormatHint = IDictionaryExtensions.IsBooleanFlagSet(hints, EncodeHintType.GS1_FORMAT);
+
+                encoded = MinimalEncoder.encodeHighLevel(contents, encoding, hasGS1FormatHint ? 0x1D : -1, shape);
+            }
+            else
+            {
+                var hasForceC40Hint = IDictionaryExtensions.IsBooleanFlagSet(hints, EncodeHintType.FORCE_C40);
+                encoded = HighLevelEncoder.encodeHighLevel(contents, shape, minSize, maxSize, defaultEncodation, hasForceC40Hint, encoding, disableEci);
+            }
 
             SymbolInfo symbolInfo = SymbolInfo.lookup(encoded.Length, shape, minSize, maxSize, true);
 
@@ -125,7 +157,7 @@ namespace ZXing.Datamatrix
             placement.place();
 
             //4. step: low-level encoding
-            return encodeLowLevel(placement, symbolInfo, width, height);
+            return encodeLowLevel(placement, symbolInfo, width, height, margin, noPadding);
         }
 
         /// <summary>
@@ -135,13 +167,14 @@ namespace ZXing.Datamatrix
         /// <param name="symbolInfo">The symbol info to encode.</param>
         /// <param name="width"></param>
         /// <param name="height"></param>
+        /// <param name="margin"></param>
         /// <returns>The bit matrix generated.</returns>
-        private static BitMatrix encodeLowLevel(DefaultPlacement placement, SymbolInfo symbolInfo, int width, int height)
+        private static BitMatrix encodeLowLevel(DefaultPlacement placement, SymbolInfo symbolInfo, int width, int height, int margin, bool noPadding)
         {
             int symbolWidth = symbolInfo.getSymbolDataWidth();
             int symbolHeight = symbolInfo.getSymbolDataHeight();
 
-            var matrix = new ByteMatrix(symbolInfo.getSymbolWidth(), symbolInfo.getSymbolHeight());
+            var matrix = new QrCode.Internal.ByteMatrix(symbolInfo.getSymbolWidth(), symbolInfo.getSymbolHeight());
 
             int matrixY = 0;
 
@@ -191,7 +224,7 @@ namespace ZXing.Datamatrix
                 }
             }
 
-            return convertByteMatrixToBitMatrix(matrix, width, height);
+            return convertByteMatrixToBitMatrix(matrix, width, height, margin, noPadding);
         }
 
         /// <summary>
@@ -200,34 +233,32 @@ namespace ZXing.Datamatrix
         /// <param name="matrix">The input matrix.</param>
         /// <param name="reqWidth">The requested width of the image (in pixels) with the Datamatrix code</param>
         /// <param name="reqHeight">The requested height of the image (in pixels) with the Datamatrix code</param>
+        /// <param name="margin"></param>
+        /// <param name="noPadding"></param>
         /// <returns>The output matrix.</returns>
-        private static BitMatrix convertByteMatrixToBitMatrix(ByteMatrix matrix, int reqWidth, int reqHeight)
+        private static BitMatrix convertByteMatrixToBitMatrix(QrCode.Internal.ByteMatrix matrix, int reqWidth, int reqHeight, int margin, bool noPadding)
         {
             var matrixWidth = matrix.Width;
             var matrixHeight = matrix.Height;
-            var outputWidth = Math.Max(reqWidth, matrixWidth);
-            var outputHeight = Math.Max(reqHeight, matrixHeight);
+            int datamatrixWidth = matrixWidth + (margin << 1);
+            int datamatrixHeight = matrixHeight + (margin << 1);
+            var outputWidth = Math.Max(reqWidth, datamatrixWidth);
+            var outputHeight = Math.Max(reqHeight, datamatrixHeight);
 
-            int multiple = Math.Min(outputWidth / matrixWidth, outputHeight / matrixHeight);
-
+            int multiple = Math.Min(outputWidth / datamatrixWidth, outputHeight / datamatrixHeight);
             int leftPadding = (outputWidth - (matrixWidth * multiple)) / 2;
             int topPadding = (outputHeight - (matrixHeight * multiple)) / 2;
 
-            BitMatrix output;
-
-            // remove padding if requested width and height are too small
-            if (reqHeight < matrixHeight || reqWidth < matrixWidth)
+            if (noPadding)
             {
-                leftPadding = 0;
-                topPadding = 0;
-                output = new BitMatrix(matrixWidth, matrixHeight);
-            }
-            else
-            {
-                output = new BitMatrix(reqWidth, reqHeight);
+                outputHeight -= (topPadding - margin) * 2;
+                outputWidth -= (leftPadding - margin) * 2;
+                leftPadding = margin;
+                topPadding = margin;
             }
 
-            output.clear();
+            var output = new BitMatrix(outputWidth, outputHeight);
+
             for (int inputY = 0, outputY = topPadding; inputY < matrixHeight; inputY++, outputY += multiple)
             {
                 // Write the contents of this row of the bytematrix

@@ -27,15 +27,14 @@ namespace ZXing.OneD.Test
         [TestCase("00123456789012", "0000010101010111000111000101110100010101110001110111010001010001110100011100010101000101011100011101011101000111000101110100010101110001110100000", TestName = "ITFtestEncode")]
         public void testEncode(String input, String expected)
         {
-            var result = new ITFWriter().encode(input, BarcodeFormat.ITF, 0, 0);
+            var result = new ITFWriter() { DefaultMargin = 5 }.encode(input, BarcodeFormat.ITF, 0, 0);
             Assert.AreEqual(expected, BitMatrixTestCase.matrixToString(result));
         }
 
         [Test]
-        [ExpectedException(typeof(ArgumentException))]
         public void testEncodeIllegalCharacters()
         {
-            new ITFWriter().encode("00123456789abc", BarcodeFormat.ITF, 0, 0);
+            Assert.Throws<ArgumentException>(() => new ITFWriter() { DefaultMargin = 5 }.encode("00123456789abc", BarcodeFormat.ITF, 0, 0));
         }
     }
 }

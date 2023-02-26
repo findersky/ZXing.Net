@@ -353,6 +353,15 @@
     <Compile Include="..\common\ECI.cs">
       <Link>common\ECI.cs</Link>
     </Compile>
+    <Compile Include="..\common\ECIEncoderSet.cs">
+      <Link>common\ECIEncoderSet.cs</Link>
+    </Compile>
+    <Compile Include="..\common\ECIInput.cs">
+      <Link>common\ECIInput.cs</Link>
+    </Compile>
+    <Compile Include="..\common\ECIStringBuilder.cs">
+      <Link>common\ECIStringBuilder.cs</Link>
+    </Compile>
     <Compile Include="..\common\EncodingOptions.cs">
       <Link>common\EncodingOptions.cs</Link>
     </Compile>
@@ -364,6 +373,9 @@
     </Compile>
     <Compile Include="..\common\HybridBinarizer.cs">
       <Link>common\HybridBinarizer.cs</Link>
+    </Compile>
+    <Compile Include="..\common\MinimalECIInput.cs">
+      <Link>common\MinimalECIInput.cs</Link>
     </Compile>
     <Compile Include="..\common\PerspectiveTransform.cs">
       <Link>common\PerspectiveTransform.cs</Link>
@@ -442,6 +454,9 @@
     </Compile>
     <Compile Include="..\datamatrix\encoder\HighLevelEncoder.cs">
       <Link>datamatrix\encoder\HighLevelEncoder.cs</Link>
+    </Compile>
+    <Compile Include="..\datamatrix\encoder\MinimalEncoder.cs">
+      <Link>datamatrix\encoder\MinimalEncoder.cs</Link>
     </Compile>
     <Compile Include="..\datamatrix\encoder\SymbolInfo.cs">
       <Link>datamatrix\encoder\SymbolInfo.cs</Link>
@@ -943,6 +958,9 @@
     </Compile>
     <Compile Include="..\renderer\SoftwareBitmapRenderer.cs">
       <Link>renderer\SoftwareBitmapRenderer.cs</Link>
+    </Compile>
+    <Compile Include="..\renderer\StringRenderer.cs">
+      <Link>renderer\StringRenderer.cs</Link>
     </Compile>
     <Compile Include="..\renderer\SVGRenderer.cs">
       <Link>renderer\SVGRenderer.cs</Link>
