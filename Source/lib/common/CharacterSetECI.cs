@@ -19,9 +19,8 @@ using System.Collections.Generic;
 
 namespace ZXing.Common
 {
-    /// <summary> Encapsulates a Character Set ECI, according to "Extended Channel Interpretations" 5.3.1.1
-    /// of ISO 18004.
-    /// 
+    /// <summary>
+    /// Encapsulates a Character Set ECI, according to "Extended Channel Interpretations" 5.3.1.1 of ISO 18004.
     /// </summary>
     /// <author>Sean Owen</author>
     public sealed class CharacterSetECI : ECI
@@ -30,6 +29,8 @@ namespace ZXing.Common
         internal static readonly IDictionary<string, CharacterSetECI> NAME_TO_ECI;
 
         private readonly String encodingName;
+        private System.Text.Encoding encoding;
+
         /// <summary>
         /// encoding name
         /// </summary>
@@ -40,6 +41,22 @@ namespace ZXing.Common
                 return encodingName;
             }
 
+        }
+
+        /// <summary>
+        /// contains get encoding class;
+        /// can be set externally if override is necessary
+        /// </summary>
+        public System.Text.Encoding Encoding
+        {
+            get
+            {
+                return encoding ?? (encoding = getEncoding(this));
+            }
+            set
+            {
+                encoding = value;
+            }
         }
 
         static CharacterSetECI()
@@ -148,7 +165,8 @@ namespace ZXing.Common
         {
             if (charsetECI == null)
                 return null;
-            return getEncoding(charsetECI.EncodingName);
+            // don't use property here because of StackOverflow
+            return charsetECI.encoding ?? (charsetECI.encoding = getEncoding(charsetECI.EncodingName));
         }
 
         /// <summary>
@@ -187,6 +205,5 @@ namespace ZXing.Common
 
             return encoding;
         }
-
     }
 }
