@@ -52,7 +52,13 @@ namespace ZXing.Common
         /// </summary>
         public static readonly Encoding ISO88591_ENCODING;
         private static readonly bool ASSUME_SHIFT_JIS;
+        /// <summary>
+        /// JIS_IS is supported or not
+        /// </summary>
         public static readonly bool JIS_IS_SUPPORTED;
+        /// <summary>
+        /// EUC_JP is supported or not
+        /// </summary>
         public static readonly bool EUC_JP_IS_SUPPORTED;
 
         // Retained for ABI compatibility with earlier versions
@@ -79,7 +85,7 @@ namespace ZXing.Common
 
         static StringUtils()
         {
-#if (NETFX_CORE || PORTABLE || NETSTANDARD)
+#if (NETFX_CORE || PORTABLE || NETSTANDARD1_0 || NETSTANDARD1_1 || NETSTANDARD1_3)
             PLATFORM_DEFAULT_ENCODING = UTF8;
             PLATFORM_DEFAULT_ENCODING_T = Encoding.UTF8;
 #else
@@ -102,7 +108,8 @@ namespace ZXing.Common
                 EUC_JP_ENCODING = PLATFORM_DEFAULT_ENCODING_T;
                 EUC_JP_IS_SUPPORTED = false;
             }
-            ASSUME_SHIFT_JIS = JIS_IS_SUPPORTED || EUC_JP_IS_SUPPORTED;
+            ASSUME_SHIFT_JIS = (JIS_IS_SUPPORTED && PLATFORM_DEFAULT_ENCODING_T.WebName.Equals(SHIFT_JIS_ENCODING.WebName))
+                || (EUC_JP_IS_SUPPORTED && PLATFORM_DEFAULT_ENCODING_T.WebName.Equals(EUC_JP_ENCODING.WebName));
         }
 
         /// <summary>
